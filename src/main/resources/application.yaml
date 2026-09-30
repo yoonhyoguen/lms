@@ -1,3 +1,22 @@
 spring:
   application:
     name: lms
+
+  # H2 메모리 DB (서버 끄면 데이터 사라짐)
+  datasource:
+    url: jdbc:h2:mem:lmsdb
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true # localhost:8080/h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # 실행할 때 Entity 보고 테이블 생성, 종료 시 삭제
+    show-sql: true          # 실행되는 SQL 을 콘솔에 출력
+    properties:
+      hibernate:
+        format_sql: true    # SQL 을 줄바꿈해서 보기 좋게
+    open-in-view: true      # 기본값을 명시 (경고 메시지 제거)
