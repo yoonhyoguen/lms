@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>학생 회원가입 - LMS</title>
+    <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
+    <link th:href="@{/css/sb-admin-2.min.css}" rel="stylesheet">
+</head>
+<body class="bg-gradient-primary">
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-xl-6 col-lg-7 col-md-9">
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-5">
+
+                    <div class="text-center">
+                        <h1 class="h4 text-gray-900 mb-4">학생 회원가입</h1>
+                    </div>
+
+                    <!--
+                      th:object  : 이 폼이 채울 객체 (컨트롤러의 signupForm)
+                      th:field   : name, id, value 를 자동으로 연결
+                      th:errors  : 그 칸의 에러 메시지 출력
+                    -->
+                    <form class="user" th:action="@{/signup}" th:object="${signupForm}" method="post" novalidate>
+
+                        <div class="form-group row">
+                            <div class="col-sm-6 mb-3 mb-sm-0">
+                                <input type="text" th:field="*{studentNo}" class="form-control form-control-user"
+                                       th:classappend="${#fields.hasErrors('studentNo')} ? 'is-invalid'"
+                                       placeholder="학번">
+                                <div class="invalid-feedback" th:errors="*{studentNo}"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="text" th:field="*{name}" class="form-control form-control-user"
+                                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                                       placeholder="이름">
+                                <div class="invalid-feedback" th:errors="*{name}"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="email" th:field="*{email}" class="form-control form-control-user"
+                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                                   placeholder="이메일 (로그인 아이디)">
+                            <div class="invalid-feedback" th:errors="*{email}"></div>
+                        </div>
+
+                        <!-- 비밀번호는 실패해도 다시 채워 넣지 않도록 th:field 대신 name 만 사용 -->
+                        <div class="form-group row">
+                            <div class="col-sm-6 mb-3 mb-sm-0">
+                                <input type="password" name="password" class="form-control form-control-user"
+                                       th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                                       placeholder="비밀번호 (8자 이상)">
+                                <div class="invalid-feedback" th:errors="*{password}"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="password" name="passwordConfirm" class="form-control form-control-user"
+                                       th:classappend="${#fields.hasErrors('passwordConfirm')} ? 'is-invalid'"
+                                       placeholder="비밀번호 확인">
+                                <div class="invalid-feedback" th:errors="*{passwordConfirm}"></div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-user btn-block">
+                            가입하기
+                        </button>
+                    </form>
+
+                    <hr>
+                    <div class="text-center">
+                        <a class="small" th:href="@{/login}">이미 계정이 있나요? 로그인</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

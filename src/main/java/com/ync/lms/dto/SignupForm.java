@@ -16,7 +16,7 @@ import lombok.Setter;
 public class SignupForm {
 
     @NotBlank(message = "학번을 입력하세요.")
-    @Pattern(regexp = "\\d{1,20}", message = "학번은 숫자만 입력하세요. (최대 20자리)")
+    @Pattern(regexp = "\\d{0,20}", message = "학번은 숫자만 입력하세요. (최대 20자리)") // 빈 값은 @NotBlank 가 담당
     private String studentNo;
 
     @NotBlank(message = "이름을 입력하세요.")

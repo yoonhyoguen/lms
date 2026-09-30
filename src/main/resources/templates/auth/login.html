@@ -28,6 +28,9 @@
                     <div th:if="${param.logout}" class="alert alert-success small">
                         로그아웃되었습니다.
                     </div>
+                    <div th:if="${param.signup}" class="alert alert-success small">
+                        회원가입이 완료되었습니다. 로그인해 주세요.
+                    </div>
 
                     <!-- th:action → CSRF 토큰 자동 삽입 -->
                     <form class="user" th:action="@{/login}" method="post">
