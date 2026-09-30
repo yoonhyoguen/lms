@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<nav th:fragment="topbar"
+     class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+    <!-- 모바일에서 사이드바 열기 버튼 -->
+    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+        <i class="fa fa-bars"></i>
+    </button>
+
+    <ul class="navbar-nav ml-auto">
+
+        <!-- 로그인한 사용자 정보 + 로그아웃 -->
+        <li class="nav-item dropdown no-arrow" sec:authorize="isAuthenticated()">
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small"
+                      sec:authentication="name">사용자</span>
+                <img class="img-profile rounded-circle" th:src="@{/img/undraw_profile.svg}">
+            </a>
+            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                 aria-labelledby="userDropdown">
+                <!-- 로그아웃은 반드시 POST (CSRF 토큰은 th:action 이 자동으로 넣어줌) -->
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                        로그아웃
+                    </button>
+                </form>
+            </div>
+        </li>
+
+    </ul>
+</nav>
+
+</html>

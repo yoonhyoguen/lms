@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title layout:title-pattern="$CONTENT_TITLE - LMS">LMS</title>
+
+    <!-- 아이콘 + SB Admin 2 디자인 (Bootstrap CSS 포함) -->
+    <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
+    <link th:href="@{/css/sb-admin-2.min.css}" rel="stylesheet">
+</head>
+<body id="page-top">
+
+<div id="wrapper">
+
+    <!-- 왼쪽 사이드바 -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+
+            <!-- 상단바 -->
+            <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+            <!-- 각 페이지 내용이 들어가는 자리 -->
+            <div class="container-fluid" layout:fragment="content"></div>
+
+        </div>
+
+        <!-- 하단 -->
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </div>
+
+</div>
+
+<!-- 공통 스크립트 (순서 중요: jQuery → Bootstrap → easing → sb-admin-2) -->
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/vendor/jquery-easing/jquery.easing.min.js}"></script>
+<script th:src="@{/js/sb-admin-2.min.js}"></script>
+
+<!-- 페이지별 스크립트 (차트, DataTables 등) 가 들어가는 자리 -->
+<th:block layout:fragment="script"></th:block>
+
+</body>
+</html>
