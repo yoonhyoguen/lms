@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>로그인 - LMS</title>
+    <link th:href="@{/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
+    <link th:href="@{/css/sb-admin-2.min.css}" rel="stylesheet">
+</head>
+<!-- 로그인 전 화면이라 layout(사이드바) 을 쓰지 않는다 -->
+<body class="bg-gradient-primary">
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-xl-5 col-lg-6 col-md-8">
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-5">
+
+                    <div class="text-center">
+                        <i class="fas fa-graduation-cap fa-3x text-primary mb-3"></i>
+                        <h1 class="h4 text-gray-900 mb-4">LMS 로그인</h1>
+                    </div>
+
+                    <!-- 로그인 실패 / 로그아웃 메시지 -->
+                    <div th:if="${param.error}" class="alert alert-danger small">
+                        이메일 또는 비밀번호가 올바르지 않습니다.
+                    </div>
+                    <div th:if="${param.logout}" class="alert alert-success small">
+                        로그아웃되었습니다.
+                    </div>
+
+                    <!-- th:action → CSRF 토큰 자동 삽입 -->
+                    <form class="user" th:action="@{/login}" method="post">
+                        <div class="form-group">
+                            <input type="email" name="email" class="form-control form-control-user"
+                                   placeholder="이메일" required autofocus>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="password" class="form-control form-control-user"
+                                   placeholder="비밀번호" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-user btn-block">
+                            로그인
+                        </button>
+                    </form>
+
+                    <hr>
+                    <div class="text-center">
+                        <a class="small" th:href="@{/signup}">학생 회원가입</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

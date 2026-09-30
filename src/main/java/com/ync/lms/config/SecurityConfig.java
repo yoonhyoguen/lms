@@ -24,8 +24,9 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
 
-            // 2) 폼 로그인 (로그인 페이지는 8단계에서 .loginPage("/login") 추가)
+            // 2) 폼 로그인
             .formLogin(form -> form
+                .loginPage("/login")               // 우리가 만든 로그인 화면 (GET /login)
                 .usernameParameter("email")        // 아이디 입력칸 이름 = email
                 .defaultSuccessUrl("/", true)      // 로그인 성공 -> 대시보드
                 .permitAll()
