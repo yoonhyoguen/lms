@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>강좌 개설</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <h1 class="h3 mb-4 text-gray-800">강좌 개설</h1>
+
+    <div class="card shadow mb-4" style="max-width: 720px;">
+        <div class="card-body">
+            <form th:action="@{/instructor/courses/new}" th:object="${courseForm}" method="post" novalidate>
+
+                <div class="form-group">
+                    <label for="title">강좌명 <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{title}" class="form-control"
+                           th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'"
+                           placeholder="예) 자바 웹 프로그래밍">
+                    <div class="invalid-feedback" th:errors="*{title}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">설명</label>
+                    <textarea th:field="*{description}" class="form-control" rows="4"
+                              th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                              placeholder="강좌 소개 (선택)"></textarea>
+                    <div class="invalid-feedback" th:errors="*{description}"></div>
+                </div>
+
+                <p class="small text-gray-500">참여코드는 개설 시 자동으로 발급됩니다.</p>
+
+                <button type="submit" class="btn btn-primary">개설하기</button>
+                <a th:href="@{/instructor/courses}" class="btn btn-secondary">취소</a>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

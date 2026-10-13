@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>내 강좌</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <!-- 제목 + 개설 버튼 -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">내 강좌</h1>
+        <a th:href="@{/instructor/courses/new}" class="btn btn-primary btn-sm shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50"></i> 강좌 개설
+        </a>
+    </div>
+
+    <!-- 강좌가 없을 때 -->
+    <div th:if="${#lists.isEmpty(courses)}" class="card shadow mb-4">
+        <div class="card-body text-center text-gray-500 py-5">
+            아직 개설한 강좌가 없습니다. 오른쪽 위 <b>강좌 개설</b> 버튼을 눌러 시작하세요.
+        </div>
+    </div>
+
+    <!-- 강좌 카드 목록 -->
+    <div class="row">
+        <div class="col-xl-4 col-md-6 mb-4" th:each="course : ${courses}">
+            <div class="card border-left-primary shadow h-100">
+                <div class="card-body">
+                    <h5 class="font-weight-bold text-primary mb-2" th:text="${course.title}">강좌명</h5>
+                    <p class="text-gray-600 small mb-3"
+                       th:text="${course.description != null and !#strings.isEmpty(course.description)} ? ${course.description} : '설명 없음'">설명</p>
+
+                    <!-- 참여코드: 학생에게 알려줄 값이라 크게 표시 -->
+                    <div class="text-xs font-weight-bold text-uppercase text-gray-500 mb-1">참여코드</div>
+                    <div class="h4 mb-0 font-weight-bold text-gray-800" style="letter-spacing: 3px;"
+                         th:text="${course.joinCode}">ABCD2345</div>
+                </div>
+                <div class="card-footer small text-gray-500"
+                     th:text="'개설일 ' + ${#temporals.format(course.createdAt, 'yyyy-MM-dd')}">개설일</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
