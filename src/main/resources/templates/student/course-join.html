@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>수강 등록</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <h1 class="h3 mb-4 text-gray-800">수강 등록</h1>
+
+    <!-- 성공 메시지 (등록 직후 한 번만) -->
+    <div th:if="${message}" class="alert alert-success" th:text="${message}">등록되었습니다.</div>
+
+    <!-- 참여코드 입력 -->
+    <div class="card shadow mb-4" style="max-width: 720px;">
+        <div class="card-body">
+            <form th:action="@{/student/courses/join}" th:object="${joinCodeForm}" method="post" novalidate>
+                <label for="joinCode">강사에게 받은 참여코드 8자리를 입력하세요.</label>
+                <div class="input-group">
+                    <input type="text" th:field="*{joinCode}" class="form-control text-uppercase"
+                           th:classappend="${#fields.hasErrors('joinCode')} ? 'is-invalid'"
+                           placeholder="예) AG5S47KN" maxlength="8" style="letter-spacing: 3px;">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary">등록</button>
+                    </div>
+                    <div class="invalid-feedback" th:errors="*{joinCode}"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 수강 중인 강좌 -->
+    <h2 class="h5 mb-3 text-gray-800">수강 중인 강좌</h2>
+
+    <div th:if="${#lists.isEmpty(enrollments)}" class="card shadow mb-4">
+        <div class="card-body text-center text-gray-500 py-4">
+            아직 수강 중인 강좌가 없습니다.
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-4 col-md-6 mb-4" th:each="enrollment : ${enrollments}">
+            <div class="card border-left-success shadow h-100">
+                <div class="card-body">
+                    <h5 class="font-weight-bold text-success mb-1" th:text="${enrollment.course.title}">강좌명</h5>
+                    <div class="small text-gray-600 mb-2">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <span th:text="${enrollment.course.instructor.name}">강사</span>
+                    </div>
+                    <p class="small text-gray-500 mb-0"
+                       th:text="${enrollment.course.description != null and !#strings.isEmpty(enrollment.course.description)} ? ${enrollment.course.description} : '설명 없음'">설명</p>
+                </div>
+                <div class="card-footer small text-gray-500"
+                     th:text="'등록일 ' + ${#temporals.format(enrollment.enrolledAt, 'yyyy-MM-dd')}">등록일</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
