@@ -51,4 +51,11 @@ public class EnrollmentService {
     public List<Enrollment> findMyEnrollments(Long studentId) {
         return enrollmentRepository.findByStudentIdOrderByEnrolledAtDesc(studentId);
     }
+
+    /**
+     * I2 강좌별 수강생 목록 (등록순). 본인 강좌인지는 CourseService 에서 먼저 확인한다.
+     */
+    public List<Enrollment> findStudentsOf(Long courseId) {
+        return enrollmentRepository.findByCourseIdOrderByEnrolledAtAsc(courseId);
+    }
 }

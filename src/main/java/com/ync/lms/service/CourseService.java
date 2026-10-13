@@ -3,9 +3,11 @@ package com.ync.lms.service;
 import com.ync.lms.domain.Course;
 import com.ync.lms.domain.User;
 import com.ync.lms.dto.CourseForm;
+import com.ync.lms.exception.NotFoundException;
 import com.ync.lms.repository.CourseRepository;
 import com.ync.lms.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +51,19 @@ public class CourseService {
      */
     public List<Course> findMyCourses(Long instructorId) {
         return courseRepository.findByInstructorIdOrderByCreatedAtDesc(instructorId);
+    }
+
+    /**
+     * B5: 본인 강좌만 조회 가능.
+     * 없는 강좌 → 404, 남의 강좌 → 403
+     */
+    public Course getMyCourse(Long courseId, Long instructorId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new NotFoundException("강좌를 찾을 수 없습니다."));
+        if (!course.isOwnedBy(instructorId)) {
+            throw new AccessDeniedException("본인 강좌가 아닙니다.");
+        }
+        return course;
     }
 
     // ===== 참여코드 생성 =====

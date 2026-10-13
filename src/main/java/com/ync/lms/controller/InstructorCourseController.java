@@ -3,6 +3,7 @@ package com.ync.lms.controller;
 import com.ync.lms.dto.CourseForm;
 import com.ync.lms.security.LoginUser;
 import com.ync.lms.service.CourseService;
+import com.ync.lms.service.EnrollmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -11,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class InstructorCourseController {
 
     private final CourseService courseService;
+    private final EnrollmentService enrollmentService;
 
     // 내 강좌 목록
     @GetMapping
@@ -44,5 +47,16 @@ public class InstructorCourseController {
         }
         courseService.create(courseForm, loginUser.getId());
         return "redirect:/instructor/courses";
+    }
+
+    // I2 강좌 상세 + 수강생 목록
+    @GetMapping("/{courseId}")
+    public String detail(@AuthenticationPrincipal LoginUser loginUser,
+                         @PathVariable Long courseId,
+                         Model model) {
+        // B5: 본인 강좌가 아니면 여기서 403 (없으면 404)
+        model.addAttribute("course", courseService.getMyCourse(courseId, loginUser.getId()));
+        model.addAttribute("enrollments", enrollmentService.findStudentsOf(courseId));
+        return "instructor/course-detail";
     }
 }

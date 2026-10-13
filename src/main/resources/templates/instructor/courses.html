@@ -30,7 +30,11 @@
         <div class="col-xl-4 col-md-6 mb-4" th:each="course : ${courses}">
             <div class="card border-left-primary shadow h-100">
                 <div class="card-body">
-                    <h5 class="font-weight-bold text-primary mb-2" th:text="${course.title}">강좌명</h5>
+                    <!-- stretched-link: 카드 전체를 클릭 가능하게 -->
+                    <h5 class="font-weight-bold mb-2">
+                        <a th:href="@{/instructor/courses/{id}(id=${course.id})}" class="stretched-link text-primary"
+                           th:text="${course.title}">강좌명</a>
+                    </h5>
                     <p class="text-gray-600 small mb-3"
                        th:text="${course.description != null and !#strings.isEmpty(course.description)} ? ${course.description} : '설명 없음'">설명</p>
 
