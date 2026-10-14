@@ -2,6 +2,7 @@ package com.ync.lms.controller;
 
 import com.ync.lms.dto.CourseForm;
 import com.ync.lms.security.LoginUser;
+import com.ync.lms.service.AssignmentService;
 import com.ync.lms.service.CourseService;
 import com.ync.lms.service.EnrollmentService;
 import jakarta.validation.Valid;
@@ -23,6 +24,7 @@ public class InstructorCourseController {
 
     private final CourseService courseService;
     private final EnrollmentService enrollmentService;
+    private final AssignmentService assignmentService;
 
     // 내 강좌 목록
     @GetMapping
@@ -57,6 +59,7 @@ public class InstructorCourseController {
         // B5: 본인 강좌가 아니면 여기서 403 (없으면 404)
         model.addAttribute("course", courseService.getMyCourse(courseId, loginUser.getId()));
         model.addAttribute("enrollments", enrollmentService.findStudentsOf(courseId));
+        model.addAttribute("assignments", assignmentService.findByCourse(courseId));
         return "instructor/course-detail";
     }
 }

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>과제 등록</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <a th:href="@{/instructor/courses/{id}(id=${course.id})}" class="small">
+        &larr; <span th:text="${course.title}">강좌</span>
+    </a>
+    <h1 class="h3 my-3 text-gray-800">과제 등록</h1>
+
+    <div class="card shadow mb-4" style="max-width: 720px;">
+        <div class="card-body">
+            <form th:action="@{/instructor/assignments/new(courseId=${course.id})}"
+                  th:object="${assignmentForm}" method="post" novalidate>
+
+                <div class="form-group">
+                    <label for="title">제목 <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{title}" class="form-control"
+                           th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'"
+                           placeholder="예) 1주차 실습 과제">
+                    <div class="invalid-feedback" th:errors="*{title}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="content">내용</label>
+                    <textarea th:field="*{content}" class="form-control" rows="5"
+                              th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'"
+                              placeholder="과제 설명"></textarea>
+                    <div class="invalid-feedback" th:errors="*{content}"></div>
+                </div>
+
+                <!-- 시작/종료 일시: 날짜+시간 선택 -->
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="startAt">시작일시 <span class="text-danger">*</span></label>
+                        <input type="datetime-local" th:field="*{startAt}" class="form-control"
+                               th:classappend="${#fields.hasErrors('startAt')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{startAt}"></div>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="endAt">종료일시 <span class="text-danger">*</span></label>
+                        <input type="datetime-local" th:field="*{endAt}" class="form-control"
+                               th:classappend="${#fields.hasErrors('endAt')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{endAt}"></div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="max-width: 200px;">
+                    <label for="maxScore">배점 <span class="text-danger">*</span></label>
+                    <input type="number" th:field="*{maxScore}" class="form-control" min="1" max="1000"
+                           th:classappend="${#fields.hasErrors('maxScore')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{maxScore}"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">등록하기</button>
+                <a th:href="@{/instructor/courses/{id}(id=${course.id})}" class="btn btn-secondary">취소</a>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
