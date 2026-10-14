@@ -4,10 +4,12 @@ import com.ync.lms.domain.Assignment;
 import com.ync.lms.domain.Course;
 import com.ync.lms.domain.Role;
 import com.ync.lms.dto.AssignmentForm;
+import com.ync.lms.exception.BusinessRuleException;
 import com.ync.lms.exception.FieldValidationException;
 import com.ync.lms.exception.NotFoundException;
 import com.ync.lms.repository.AssignmentRepository;
 import com.ync.lms.repository.EnrollmentRepository;
+import com.ync.lms.repository.SubmissionRepository;
 import com.ync.lms.security.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,6 +26,7 @@ public class AssignmentService {
 
     private final AssignmentRepository assignmentRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final SubmissionRepository submissionRepository;
     private final CourseService courseService;
     private final FileStorageService fileStorageService;
 
@@ -146,10 +149,10 @@ public class AssignmentService {
     public Long delete(Long assignmentId, Long instructorId) {
         Assignment assignment = getMyAssignment(assignmentId, instructorId); // B5
 
-        // TODO [W3] B8: 제출물이 1건이라도 있으면 삭제 불가
-        //   if (submissionRepository.existsByAssignmentId(assignmentId)) {
-        //       throw new BusinessRuleException("제출물이 있어 삭제할 수 없습니다.");
-        //   }
+        // B8: 제출물이 1건이라도 있으면 삭제 불가
+        if (submissionRepository.existsByAssignmentId(assignmentId)) {
+            throw new BusinessRuleException("제출물이 있어 삭제할 수 없습니다.");
+        }
 
         Long courseId = assignment.getCourse().getId();
         String storedName = assignment.getFileStoredName();
