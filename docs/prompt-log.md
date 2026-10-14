@@ -108,3 +108,110 @@ SecurityConfig 작성 (URL별 권한, 폼 로그인, BCrypt `PasswordEncoder` �
 
 **배운 점**
 같은 URL 이라도 요청하는 쪽(Accept 헤더)에 따라 응답 형식이 달라진다. Postman 테스트에서 JSON 이 와도 정상.
+
+---
+
+## 2026-10-13 · I2 / B5 · 주소 숫자만 바꾸면 남의 강좌를 볼 수 있는 문제
+
+**요청**
+강좌 상세 페이지(`/instructor/courses/{courseId}`)와 수강생 목록 만들기.
+
+**문제**
+- SecurityConfig 의 `/instructor/**` → `hasRole("INSTRUCTOR")` 는 "강사인가?" 만 확인한다.
+- 그래서 강사2가 주소창에 강사1의 강좌 번호(`/instructor/courses/1`)를 직접 입력하면 **통과**된다.
+- 남의 강좌 수강생 명단(학번, 이름, 이메일)이 노출될 수 있음.
+
+**원인**
+- 역할(Role) 검사와 소유자(Owner) 검사는 다른 문제다.
+  - 1겹: SecurityConfig → 강사인가? (학생 차단)
+  - 2겹: Service → **이 강좌의 주인인가?** (다른 강사 차단) ← 빠져 있었음
+
+**해결**
+- `Course.isOwnedBy(userId)` 로 주인 판단 (`Long` 비교는 `==` 가 아니라 `equals`)
+- `CourseService.getMyCourse(courseId, instructorId)`
+  - 없는 강좌 → `NotFoundException` → 404
+  - 남의 강좌 → `AccessDeniedException` → 403
+- 이후 과제 등록·수정·삭제(`getMyAssignment`)에도 같은 방식으로 재사용.
+
+**검증**
+| 상황 | 결과 |
+|---|---|
+| 강사1 → 내 강좌 | 200, 수강생 표 |
+| 강사2 → 강사1 강좌 | **403** |
+| 강사2 → 강사1 강좌에 과제 등록 POST | **403**, 과제 개수 변화 없음 |
+| 없는 강좌 번호 | 404 |
+
+**내가 직접 확인한 것**
+- [ ] (예: 시크릿 창에서 강사2로 로그인 → 강사1 강좌 주소 입력 → 403 화면 확인)
+
+---
+
+## 2026-10-14 · I3 · 배점에 글자를 넣으면 영어 오류 메시지가 노출됨
+
+**요청**
+과제 등록 폼 (제목, 내용, 시작/종료일시, 배점) 과 검증 (`@NotNull`, `@Min`, `@Max`, B7).
+
+**문제**
+- 배점(`Integer`) 칸에 `abc` 를 보내면 입력칸 아래에 이런 문구가 나옴.
+  ```
+  Failed to convert property value of type 'java.lang.String' to required type 'java.lang.Integer'...
+  ```
+- 사용자에게 내부 자바 타입 이름이 그대로 보임.
+
+**원인**
+- `@Min`, `@NotNull` 같은 검증은 값이 **숫자로 변환된 뒤** 동작한다.
+- 변환 자체가 실패(`typeMismatch`)하면 검증 어노테이션의 `message` 가 아니라 Spring 기본 영어 메시지가 나온다.
+
+**해결**
+- `src/main/resources/messages.properties` 추가 (Spring Boot 가 자동으로 읽음)
+  ```
+  typeMismatch.java.lang.Integer=숫자를 입력하세요.
+  typeMismatch.java.time.LocalDateTime=날짜와 시간을 올바르게 입력하세요.
+  ```
+
+**검증**
+| 입력 | 결과 |
+|---|---|
+| 배점 `abc` | 숫자를 입력하세요. |
+| 배점 `0` | 배점은 1 이상이어야 합니다. |
+| 종료일시 = 시작일시 | 종료일시는 시작일시보다 뒤여야 합니다. (B7) |
+
+**배운 점**
+화면의 `type="number"` 는 브라우저 편의일 뿐, 개발자도구나 Postman 으로는 글자를 보낼 수 있다. 서버 쪽 메시지도 준비해야 한다.
+
+**내가 직접 확인한 것**
+- [ ] (예: 개발자도구로 배점 input 의 type 을 text 로 바꾸고 abc 입력 → 한국어 메시지 확인)
+
+---
+
+## 2026-10-14 · I3 · 첨부파일 한글 이름이 깨져서 다운로드됨 (테스트 도구 문제)
+
+**요청**
+과제 첨부파일 업로드 / 다운로드 (`FileStorageService`, UUID 저장, 원래 이름으로 다운로드).
+
+**문제**
+- 테스트에서 `1주차 과제.txt` 를 올리고 받았더니 다운로드 이름이 깨짐.
+  ```
+  filename*=UTF-8''1%EF%BF%BD%EF%BF%BD...   (EF BF BD = 깨진 글자 표시)
+  ```
+
+**원인**
+- 서버 코드 문제가 아니었다.
+- Windows 명령창에서 curl 로 보낼 때 한글 파일명이 **UTF-8 이 아닌 인코딩**으로 전송됨 → 서버가 UTF-8 로 읽다가 깨짐.
+- 실제 브라우저는 항상 UTF-8 로 보낸다.
+
+**해결**
+- 파일명을 UTF-8 바이트로 직접 넣은 요청(브라우저와 같은 조건)으로 다시 테스트.
+- 코드 변경 없음. (다운로드 쪽은 처음부터 `ContentDisposition...filename(name, UTF_8)` 사용)
+
+**검증**
+```
+filename*=UTF-8''1%EC%A3%BC%EC%B0%A8%20%EA%B3%BC%EC%A0%9C.txt   → "1주차 과제.txt"
+```
+수정 화면의 "현재 파일" 에도 `1주차 과제.txt` 로 표시됨.
+
+**배운 점**
+에러 페이지 JSON 사례(U3)와 같은 종류. 결과가 이상할 때 코드부터 고치지 말고, **테스트 조건이 실제 사용 환경과 같은지** 먼저 확인한다.
+
+**내가 직접 확인한 것**
+- [ ] (예: 브라우저에서 한글 이름 파일 첨부 → 📎 다운로드 → 저장된 파일 이름 확인)
