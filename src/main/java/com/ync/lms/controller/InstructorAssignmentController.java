@@ -99,16 +99,18 @@ public class InstructorAssignmentController {
                        @RequestParam(required = false) MultipartFile file, // 새 첨부 (선택)
                        Model model,
                        RedirectAttributes redirectAttributes) {
-        Assignment assignment = assignmentService.getMyAssignment(assignmentId, loginUser.getId()); // B5
+        Long courseId = assignmentService.getMyAssignment(assignmentId, loginUser.getId()).getCourse().getId(); // B5
         if (!bindingResult.hasErrors()) {
             try {
                 assignmentService.update(assignmentId, assignmentForm, file, loginUser.getId());
                 redirectAttributes.addFlashAttribute("message", "과제가 수정되었습니다.");
-                return "redirect:/instructor/courses/" + assignment.getCourse().getId();
+                return "redirect:/instructor/courses/" + courseId;
             } catch (FieldValidationException e) {
                 bindingResult.rejectValue(e.getField(), "invalid", e.getMessage()); // B7
             }
         }
+        // 실패 시 새로 조회 (update() 롤백 후에는 이전 엔티티의 LAZY 필드를 읽을 수 없음)
+        Assignment assignment = assignmentService.getMyAssignment(assignmentId, loginUser.getId());
         model.addAttribute("assignment", assignment);
         model.addAttribute("course", assignment.getCourse());
         return "instructor/assignment-form";

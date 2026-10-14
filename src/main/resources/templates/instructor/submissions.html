@@ -72,6 +72,7 @@
                         <th>제출일시</th>
                         <th>첨부</th>
                         <th>점수</th>
+                        <th>채점</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -93,6 +94,13 @@
                             </a>
                         </td>
                         <td th:text="${row.submitted and row.submission.graded} ? ${row.submission.score} : '-'">-</td>
+                        <td>
+                            <a th:if="${row.submitted}"
+                               th:href="@{/instructor/submissions/{id}/grade(id=${row.submission.id})}"
+                               class="btn btn-sm"
+                               th:classappend="${row.submission.graded} ? 'btn-outline-secondary' : 'btn-primary'"
+                               th:text="${row.submission.graded} ? '수정' : '채점'">채점</a>
+                        </td>
                     </tr>
                     </tbody>
                 </table>

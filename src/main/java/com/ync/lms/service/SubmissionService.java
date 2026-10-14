@@ -5,6 +5,7 @@ import com.ync.lms.domain.Enrollment;
 import com.ync.lms.domain.Role;
 import com.ync.lms.domain.Submission;
 import com.ync.lms.domain.User;
+import com.ync.lms.dto.GradeForm;
 import com.ync.lms.dto.SubmissionForm;
 import com.ync.lms.exception.BusinessRuleException;
 import com.ync.lms.exception.FieldValidationException;
@@ -87,6 +88,38 @@ public class SubmissionService {
         }
         submissionRepository.save(submission);
         return false;
+    }
+
+    // ===== I5 채점 =====
+
+    /**
+     * B5: 본인 강좌의 제출물만. 없으면 404, 남의 강좌면 403
+     */
+    public Submission getForGrading(Long submissionId, Long instructorId) {
+        Submission submission = submissionRepository.findById(submissionId)
+                .orElseThrow(() -> new NotFoundException("제출물을 찾을 수 없습니다."));
+        if (!submission.getAssignment().getCourse().isOwnedBy(instructorId)) {
+            throw new AccessDeniedException("본인 강좌의 제출물이 아닙니다.");
+        }
+        return submission;
+    }
+
+    /**
+     * I5 채점 / 재채점. 채점 후 상태가 GRADED 가 되어 학생은 재제출 불가 (B4)
+     * @return 과제 id (채점 후 제출 현황으로 돌아가기 위해)
+     */
+    @Transactional
+    public Long grade(Long submissionId, GradeForm form, Long instructorId) {
+        Submission submission = getForGrading(submissionId, instructorId); // B5
+
+        // B6: 0 ≤ 점수 ≤ 배점
+        int maxScore = submission.getAssignment().getMaxScore();
+        if (form.getScore() < 0 || form.getScore() > maxScore) {
+            throw new FieldValidationException("score", "점수는 0 이상 " + maxScore + " 이하로 입력하세요.");
+        }
+
+        submission.grade(form.getScore(), form.getFeedback());
+        return submission.getAssignment().getId();
     }
 
     // ===== I4 제출 현황 =====
