@@ -46,6 +46,25 @@ public class InstructorSubmissionController {
         return "instructor/submissions";
     }
 
+    // 추가 기능: 점수 공개 / 공개 취소 (학교 LMS "교수가 평가 중입니다" 참고)
+    @PostMapping("/instructor/assignments/{assignmentId}/publish")
+    public String publish(@AuthenticationPrincipal LoginUser loginUser,
+                          @PathVariable Long assignmentId,
+                          RedirectAttributes redirectAttributes) {
+        submissionService.setScoresPublished(assignmentId, true, loginUser.getId()); // B5
+        redirectAttributes.addFlashAttribute("message", "점수를 공개했습니다. 학생이 채점 결과를 볼 수 있습니다.");
+        return "redirect:/instructor/assignments/" + assignmentId + "/submissions";
+    }
+
+    @PostMapping("/instructor/assignments/{assignmentId}/unpublish")
+    public String unpublish(@AuthenticationPrincipal LoginUser loginUser,
+                            @PathVariable Long assignmentId,
+                            RedirectAttributes redirectAttributes) {
+        submissionService.setScoresPublished(assignmentId, false, loginUser.getId()); // B5
+        redirectAttributes.addFlashAttribute("message", "점수 공개를 취소했습니다. 학생에게는 \"평가 중\"으로 보입니다.");
+        return "redirect:/instructor/assignments/" + assignmentId + "/submissions";
+    }
+
     // 추가 기능: 제출 현황 CSV 다운로드 (엑셀에서 바로 열림)
     @GetMapping("/instructor/assignments/{assignmentId}/submissions.csv")
     public ResponseEntity<byte[]> submissionsCsv(@AuthenticationPrincipal LoginUser loginUser,

@@ -24,8 +24,9 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     // S4 학생: 내 제출 목록 (최근 제출순)
     List<Submission> findByStudentIdOrderBySubmittedAtDesc(Long studentId);
 
-    // 학생 대시보드 "최근 피드백": 최근 채점된 제출물 3개
-    List<Submission> findTop3ByStudentIdAndStatusOrderByGradedAtDesc(Long studentId, SubmissionStatus status);
+    // 학생 대시보드 "최근 피드백": 최근 채점 + 점수 공개된 제출물 3개
+    List<Submission> findTop3ByStudentIdAndStatusAndAssignmentScoresPublishedTrueOrderByGradedAtDesc(
+            Long studentId, SubmissionStatus status);
 
     // 강사 대시보드: 내 강좌들의 채점 대기(SUBMITTED) 수
     long countByAssignmentCourseInstructorIdAndStatus(Long instructorId, SubmissionStatus status);

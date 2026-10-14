@@ -42,17 +42,19 @@
                         </td>
                         <td class="small" th:text="${#temporals.format(submission.submittedAt, 'yyyy-MM-dd HH:mm')}">일시</td>
                         <td>
-                            <span class="badge" th:classappend="${submission.status.badgeClass}"
-                                  th:text="${submission.status.label}">제출됨</span>
+                            <span class="badge" th:classappend="${submission.studentStatusBadge}"
+                                  th:text="${submission.studentStatusLabel}">제출됨</span>
                         </td>
                         <td>
-                            <span th:if="${submission.graded}" class="font-weight-bold"
+                            <!-- 점수·피드백은 채점 + 점수 공개된 것만 (평가 중이면 숨김) -->
+                            <span th:if="${submission.resultVisible}" class="font-weight-bold"
                                   th:text="${submission.score} + ' / ' + ${assignment.maxScore}">40 / 50</span>
-                            <span th:unless="${submission.graded}" class="small text-gray-500">채점 전</span>
+                            <span th:unless="${submission.resultVisible}" class="small text-gray-500"
+                                  th:text="${submission.graded} ? '평가 중' : '채점 전'">채점 전</span>
                         </td>
                         <!-- 피드백은 길 수 있어서 50자까지만, 전체는 과제 상세에서 -->
                         <td class="small"
-                            th:text="${submission.feedback != null and !#strings.isEmpty(submission.feedback)} ? ${#strings.abbreviate(submission.feedback, 50)} : '-'">
+                            th:text="${submission.resultVisible and submission.feedback != null and !#strings.isEmpty(submission.feedback)} ? ${#strings.abbreviate(submission.feedback, 50)} : '-'">
                             피드백
                         </td>
                     </tr>

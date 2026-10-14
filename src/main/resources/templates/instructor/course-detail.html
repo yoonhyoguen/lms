@@ -84,7 +84,12 @@
                             th:text="${#temporals.format(assignment.startAt, 'MM-dd HH:mm')} + ' ~ ' + ${#temporals.format(assignment.endAt, 'MM-dd HH:mm')}">
                             10-14 09:00 ~ 10-20 23:59
                         </td>
-                        <td th:text="${assignment.maxScore}">100</td>
+                        <td>
+                            <span th:text="${assignment.maxScore}">100</span>
+                            <!-- 점수 공개 여부 (추가 기능) -->
+                            <i th:if="${assignment.scoresPublished}" class="fas fa-eye text-success small ml-1" title="점수 공개됨"></i>
+                            <i th:unless="${assignment.scoresPublished}" class="fas fa-eye-slash text-gray-400 small ml-1" title="점수 비공개"></i>
+                        </td>
                     </tr>
                     </tbody>
                 </table>

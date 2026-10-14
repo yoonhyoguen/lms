@@ -54,8 +54,8 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">내 제출</h6>
-            <span th:if="${submission}" class="badge" th:classappend="${submission.status.badgeClass}"
-                  th:text="${submission.status.label}">제출됨</span>
+            <span th:if="${submission}" class="badge" th:classappend="${submission.studentStatusBadge}"
+                  th:text="${submission.studentStatusLabel}">제출됨</span>
             <span th:unless="${submission}" class="badge badge-light">미제출</span>
         </div>
         <div class="card-body">
@@ -70,8 +70,20 @@
                 </span>
             </div>
 
-            <!-- 채점 완료: 결과만 보여주고 제출 폼 없음 (B4) -->
-            <div th:if="${submission != null and submission.graded}">
+            <!-- 채점했지만 점수 비공개: 평가 중 (B4 는 적용 → 제출 폼 없음) -->
+            <div th:if="${submission != null and submission.graded and !submission.resultVisible}">
+                <div class="alert alert-warning mb-3">
+                    <i class="fas fa-eye-slash"></i>
+                    교수가 평가 중입니다. 점수가 공개되면 점수와 피드백을 볼 수 있습니다. (다시 제출할 수 없습니다)
+                </div>
+                <dl class="row mb-0">
+                    <dt class="col-sm-2">제출 내용</dt>
+                    <dd class="col-sm-10" style="white-space: pre-wrap;" th:text="${submission.content}">내용</dd>
+                </dl>
+            </div>
+
+            <!-- 채점 완료 + 점수 공개: 결과만 보여주고 제출 폼 없음 (B4) -->
+            <div th:if="${submission != null and submission.resultVisible}">
                 <div class="alert alert-success mb-3">
                     채점이 완료되어 다시 제출할 수 없습니다.
                 </div>

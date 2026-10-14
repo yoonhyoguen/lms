@@ -39,25 +39,26 @@ public class StudentCourseService {
             return submission != null;
         }
 
+        /** 학생에게 점수가 보이는 과제 = 채점 완료 + 점수 공개 (평가 중은 아직 점수 없음으로 취급) */
         public boolean isGraded() {
-            return submission != null && submission.isGraded();
+            return submission != null && submission.isResultVisible();
         }
 
         public boolean isStarted() {
             return assignment.getStatus() != AssignmentStatus.UPCOMING;
         }
 
-        /** 내 제출 상태 글자: 예정 / 미제출 / 제출됨 / 채점 완료 */
+        /** 내 제출 상태 글자: 예정 / 미제출 / 제출됨 / 평가 중 / 채점 완료 */
         public String myStatusLabel() {
             if (submission != null) {
-                return submission.getStatus().getLabel();
+                return submission.getStudentStatusLabel();
             }
             return isStarted() ? "미제출" : "예정";
         }
 
         public String myStatusBadge() {
             if (submission != null) {
-                return submission.getStatus().getBadgeClass();
+                return submission.getStudentStatusBadge();
             }
             return isStarted() ? "badge-danger" : "badge-light";
         }

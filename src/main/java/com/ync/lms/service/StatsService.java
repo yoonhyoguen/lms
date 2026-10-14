@@ -215,7 +215,7 @@ public class StatsService {
 
         List<ScoredAssignment> scored = assignments.stream()
                 .map(a -> mySubmissions.get(a.getId()))
-                .filter(s -> s != null && s.isGraded())
+                .filter(s -> s != null && s.isResultVisible()) // 점수 공개된 것만 (평가 중은 제외)
                 .map(s -> new ScoredAssignment(s.getAssignment().getTitle(), s.getScore(), s.getAssignment().getMaxScore()))
                 .toList();
 

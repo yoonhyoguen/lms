@@ -79,6 +79,28 @@ public class Submission {
         return status == SubmissionStatus.GRADED;
     }
 
+    // ===== 학생에게 보여 줄 때 (점수 공개 시점, 추가 기능) =====
+
+    /** 학생이 점수·피드백을 볼 수 있나? = 채점 완료 + 강사가 점수 공개 */
+    public boolean isResultVisible() {
+        return isGraded() && assignment.isScoresPublished();
+    }
+
+    /** 학생 화면 상태: 제출됨 / 평가 중(채점했지만 비공개) / 채점 완료 */
+    public String getStudentStatusLabel() {
+        if (isGraded() && !isResultVisible()) {
+            return "평가 중";
+        }
+        return status.getLabel();
+    }
+
+    public String getStudentStatusBadge() {
+        if (isGraded() && !isResultVisible()) {
+            return "badge-warning";
+        }
+        return status.getBadgeClass();
+    }
+
     // ===== 첨부파일 (Assignment 와 같은 방식) =====
 
     public boolean hasFile() {

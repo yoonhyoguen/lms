@@ -55,9 +55,11 @@ public class SubmissionService {
 
         Optional<Submission> existing = submissionRepository.findByAssignmentIdAndStudentId(assignmentId, studentId);
 
-        // B4: 채점 완료된 제출은 재제출 불가
+        // B4: 채점 완료된 제출은 재제출 불가 (점수 공개 전이어도 적용: 강사가 매긴 점수 위로 답안이 덮어써지지 않게)
         if (existing.isPresent() && existing.get().isGraded()) {
-            throw new BusinessRuleException("채점 완료된 과제는 다시 제출할 수 없습니다.");
+            throw new BusinessRuleException(existing.get().isResultVisible()
+                    ? "채점 완료된 과제는 다시 제출할 수 없습니다."
+                    : "평가 중인 과제는 다시 제출할 수 없습니다.");
         }
 
         // 내용 또는 파일 중 하나는 있어야 함 (재제출 시 기존 파일이 있으면 내용 없이도 가능)
@@ -170,10 +172,26 @@ public class SubmissionService {
     }
 
     /**
-     * 학생 대시보드 "최근 피드백": 최근 채점된 과제 3개
+     * 학생 대시보드 "최근 피드백": 최근 채점 + 점수 공개된 과제 3개
      */
     public List<Submission> findRecentFeedback(Long studentId) {
-        return submissionRepository.findTop3ByStudentIdAndStatusOrderByGradedAtDesc(studentId, SubmissionStatus.GRADED);
+        return submissionRepository.findTop3ByStudentIdAndStatusAndAssignmentScoresPublishedTrueOrderByGradedAtDesc(
+                studentId, SubmissionStatus.GRADED);
+    }
+
+    // ===== 점수 공개 (추가 기능) =====
+
+    /**
+     * 과제 점수 공개/비공개 (B5: 본인 강좌 과제만)
+     */
+    @Transactional
+    public void setScoresPublished(Long assignmentId, boolean published, Long instructorId) {
+        Assignment assignment = assignmentService.getMyAssignment(assignmentId, instructorId); // B5
+        if (published) {
+            assignment.publishScores();
+        } else {
+            assignment.unpublishScores();
+        }
     }
 
     /**
