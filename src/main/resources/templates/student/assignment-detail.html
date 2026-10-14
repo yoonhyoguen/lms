@@ -50,7 +50,78 @@
         </div>
     </div>
 
-    <!-- W3 S3: 제출 영역이 여기에 들어갈 예정 -->
+    <!-- ===== S3 제출 영역 ===== -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">내 제출</h6>
+            <span th:if="${submission}" class="badge" th:classappend="${submission.status.badgeClass}"
+                  th:text="${submission.status.label}">제출됨</span>
+            <span th:unless="${submission}" class="badge badge-light">미제출</span>
+        </div>
+        <div class="card-body">
+
+            <!-- 이미 제출한 내용 -->
+            <div th:if="${submission}" class="mb-3 small text-gray-600">
+                마지막 제출: <span th:text="${#temporals.format(submission.submittedAt, 'yyyy-MM-dd HH:mm')}">일시</span>
+                <span th:if="${submission.hasFile()}">
+                    · 첨부:
+                    <a th:href="@{/submissions/{id}/file(id=${submission.id})}"
+                       th:text="${submission.fileOriginalName}">파일</a>
+                </span>
+            </div>
+
+            <!-- 채점 완료: 결과만 보여주고 제출 폼 없음 (B4) -->
+            <div th:if="${submission != null and submission.graded}">
+                <div class="alert alert-success mb-3">
+                    채점이 완료되어 다시 제출할 수 없습니다.
+                </div>
+                <dl class="row mb-0">
+                    <dt class="col-sm-2">점수</dt>
+                    <dd class="col-sm-10 h5" th:text="${submission.score} + ' / ' + ${assignment.maxScore}">90 / 100</dd>
+                    <dt class="col-sm-2">피드백</dt>
+                    <dd class="col-sm-10" style="white-space: pre-wrap;"
+                        th:text="${submission.feedback != null and !#strings.isEmpty(submission.feedback)} ? ${submission.feedback} : '피드백 없음'">피드백</dd>
+                    <dt class="col-sm-2">제출 내용</dt>
+                    <dd class="col-sm-10" style="white-space: pre-wrap;" th:text="${submission.content}">내용</dd>
+                </dl>
+            </div>
+
+            <!-- 채점 전: 제출 폼 -->
+            <form th:unless="${submission != null and submission.graded}"
+                  th:action="@{/student/assignments/{id}/submit(id=${assignment.id})}"
+                  th:object="${submissionForm}" method="post" enctype="multipart/form-data" novalidate>
+
+                <!-- 기간 밖이면 안내 (B1). 화면에서 막는 건 편의, 진짜 검사는 서버에서 -->
+                <div th:unless="${assignment.submittable}" class="alert alert-warning">
+                    제출 기간이 아닙니다.
+                    (<span th:text="${#temporals.format(assignment.startAt, 'MM-dd HH:mm')} + ' ~ ' + ${#temporals.format(assignment.endAt, 'MM-dd HH:mm')}">기간</span>)
+                </div>
+
+                <!-- fieldset disabled: 기간 밖이면 안의 입력칸과 버튼이 모두 비활성화 -->
+                <fieldset th:disabled="${!assignment.submittable}">
+                    <div class="form-group">
+                        <label for="content">내용</label>
+                        <textarea th:field="*{content}" class="form-control" rows="6"
+                                  th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'"
+                                  placeholder="답안 또는 설명을 입력하세요."></textarea>
+                        <div class="invalid-feedback" th:errors="*{content}"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="file">첨부파일 <span class="small text-gray-500">(선택, 10MB 이하)</span></label>
+                        <input type="file" id="file" name="file" class="form-control-file">
+                        <small th:if="${submission != null and submission.hasFile()}" class="text-gray-500">
+                            새 파일을 고르면 기존 파일이 교체됩니다.
+                        </small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary"
+                            th:text="${submission} ? '재제출하기' : '제출하기'">제출하기</button>
+                </fieldset>
+            </form>
+
+        </div>
+    </div>
 
 </div>
 
