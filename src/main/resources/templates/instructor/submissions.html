@@ -30,14 +30,15 @@
         기간 · 배점
     </p>
 
-    <!-- 점수 공개 (추가 기능): 공개 전에는 학생에게 "평가 중" 으로 보임 -->
+    <!-- 점수 공개 (추가 기능): 기본은 공개. 숨기면 학생에게 "평가 중" 으로 보임 -->
     <div class="alert d-flex align-items-center justify-content-between"
          th:classappend="${assignment.scoresPublished} ? 'alert-success' : 'alert-secondary'">
         <div th:if="${assignment.scoresPublished}">
-            <i class="fas fa-eye"></i> <b>점수 공개됨</b> — 학생이 채점된 점수와 피드백을 볼 수 있습니다.
+            <i class="fas fa-eye"></i> <b>점수 공개됨</b> — 채점하면 학생이 바로 점수와 피드백을 볼 수 있습니다.
+            <span class="small">(채점이 다 끝날 때까지 숨기려면 [점수 숨기기])</span>
         </div>
         <div th:unless="${assignment.scoresPublished}">
-            <i class="fas fa-eye-slash"></i> <b>점수 비공개</b> — 학생에게는 채점한 제출물도 "평가 중"으로 보입니다.
+            <i class="fas fa-eye-slash"></i> <b>점수 숨김</b> — 학생에게는 채점한 제출물도 "평가 중"으로 보입니다.
         </div>
         <form th:action="${assignment.scoresPublished}
                          ? @{/instructor/assignments/{id}/unpublish(id=${assignment.id})}
@@ -45,7 +46,7 @@
               method="post" class="ml-3 mb-0">
             <button type="submit" class="btn btn-sm"
                     th:classappend="${assignment.scoresPublished} ? 'btn-outline-secondary' : 'btn-primary'"
-                    th:text="${assignment.scoresPublished} ? '공개 취소' : '점수 공개'">점수 공개</button>
+                    th:text="${assignment.scoresPublished} ? '점수 숨기기' : '점수 공개'">점수 숨기기</button>
         </form>
     </div>
 

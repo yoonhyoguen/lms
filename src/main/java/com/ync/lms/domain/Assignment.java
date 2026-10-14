@@ -37,10 +37,12 @@ public class Assignment {
     @Column(nullable = false)
     private int maxScore;          // 배점
 
-    // 추가 기능: 점수 공개 여부 (공개 전에는 학생에게 "평가 중"). 기존 과제는 비공개(false)로 채워짐
-    @ColumnDefault("false")
+    // 추가 기능: 점수 공개 여부. 기본은 공개(true) → 채점하면 바로 학생에게 보임 (슬라이드 S4 그대로)
+    //   강사가 [점수 숨기기] 를 누른 과제만 학생에게 "평가 중"
+    //   (이 칸이 없던 DB 에 새로 추가될 때도 기존 과제는 공개로 채워짐)
+    @ColumnDefault("true")
     @Column(nullable = false)
-    private boolean scoresPublished;
+    private boolean scoresPublished = true;
 
     // 첨부파일 (선택) - 15-4 단계에서 사용
     private String fileOriginalName; // 사용자가 올린 이름 (다운로드 시 표시)

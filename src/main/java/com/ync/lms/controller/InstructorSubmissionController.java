@@ -61,7 +61,7 @@ public class InstructorSubmissionController {
                             @PathVariable Long assignmentId,
                             RedirectAttributes redirectAttributes) {
         submissionService.setScoresPublished(assignmentId, false, loginUser.getId()); // B5
-        redirectAttributes.addFlashAttribute("message", "점수 공개를 취소했습니다. 학생에게는 \"평가 중\"으로 보입니다.");
+        redirectAttributes.addFlashAttribute("message", "점수를 숨겼습니다. 학생에게는 \"평가 중\"으로 보입니다.");
         return "redirect:/instructor/assignments/" + assignmentId + "/submissions";
     }
 

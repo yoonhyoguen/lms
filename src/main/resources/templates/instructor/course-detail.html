@@ -88,7 +88,7 @@
                             <span th:text="${assignment.maxScore}">100</span>
                             <!-- 점수 공개 여부 (추가 기능) -->
                             <i th:if="${assignment.scoresPublished}" class="fas fa-eye text-success small ml-1" title="점수 공개됨"></i>
-                            <i th:unless="${assignment.scoresPublished}" class="fas fa-eye-slash text-gray-400 small ml-1" title="점수 비공개"></i>
+                            <i th:unless="${assignment.scoresPublished}" class="fas fa-eye-slash text-gray-400 small ml-1" title="점수 숨김 (학생에게 평가 중)"></i>
                         </td>
                     </tr>
                     </tbody>

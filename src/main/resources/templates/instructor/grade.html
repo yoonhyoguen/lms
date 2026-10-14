@@ -83,7 +83,7 @@
                         <p class="small" th:classappend="${assignment.scoresPublished} ? 'text-success' : 'text-gray-500'"
                            th:text="${assignment.scoresPublished}
                                     ? '이 과제는 점수 공개 상태라 저장하면 학생에게 바로 보입니다.'
-                                    : '이 과제는 점수 비공개 상태입니다. 제출 현황에서 [점수 공개]를 눌러야 학생에게 보입니다.'">안내</p>
+                                    : '이 과제는 점수를 숨긴 상태입니다. 제출 현황에서 [점수 공개]를 눌러야 학생에게 보입니다.'">안내</p>
 
                         <button type="submit" class="btn btn-primary">저장</button>
                     </form>
