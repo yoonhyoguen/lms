@@ -1,6 +1,7 @@
 package com.ync.lms.service;
 
 import com.ync.lms.domain.Assignment;
+import com.ync.lms.domain.Enrollment;
 import com.ync.lms.domain.Role;
 import com.ync.lms.domain.Submission;
 import com.ync.lms.domain.User;
@@ -8,6 +9,7 @@ import com.ync.lms.dto.SubmissionForm;
 import com.ync.lms.exception.BusinessRuleException;
 import com.ync.lms.exception.FieldValidationException;
 import com.ync.lms.exception.NotFoundException;
+import com.ync.lms.repository.EnrollmentRepository;
 import com.ync.lms.repository.SubmissionRepository;
 import com.ync.lms.repository.UserRepository;
 import com.ync.lms.security.LoginUser;
@@ -18,7 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +33,7 @@ import java.util.Optional;
 public class SubmissionService {
 
     private final SubmissionRepository submissionRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
     private final AssignmentService assignmentService;
     private final FileStorageService fileStorageService;
@@ -79,6 +87,52 @@ public class SubmissionService {
         }
         submissionRepository.save(submission);
         return false;
+    }
+
+    // ===== I4 제출 현황 =====
+
+    /** 표 한 줄: 수강생 + 그 학생의 제출물 (미제출이면 submission == null) */
+    public record SubmissionRow(User student, Submission submission) {
+        public boolean isSubmitted() {
+            return submission != null;
+        }
+    }
+
+    /** 제출 현황 전체: 표 + 요약 숫자 */
+    public record SubmissionStatusView(Assignment assignment, List<SubmissionRow> rows) {
+        public long totalCount() {
+            return rows.size();
+        }
+        public long submittedCount() {
+            return rows.stream().filter(SubmissionRow::isSubmitted).count();
+        }
+        public long notSubmittedCount() {
+            return totalCount() - submittedCount();
+        }
+        public long gradedCount() {
+            return rows.stream().filter(r -> r.isSubmitted() && r.submission().isGraded()).count();
+        }
+    }
+
+    /**
+     * I4 과제별 제출/미제출 목록 (B5: 본인 강좌 과제만)
+     * 미제출자 = 수강생 명단 - 제출한 학생 (저장하지 않고 계산)
+     */
+    public SubmissionStatusView getSubmissionStatus(Long assignmentId, Long instructorId) {
+        Assignment assignment = assignmentService.getMyAssignment(assignmentId, instructorId); // B5
+
+        // 학생 id → 제출물
+        Map<Long, Submission> submissionByStudent = submissionRepository.findByAssignmentId(assignmentId).stream()
+                .collect(Collectors.toMap(s -> s.getStudent().getId(), Function.identity()));
+
+        List<SubmissionRow> rows = enrollmentRepository.findByCourseIdOrderByEnrolledAtAsc(assignment.getCourse().getId())
+                .stream()
+                .map(Enrollment::getStudent)
+                .sorted(Comparator.comparing(User::getStudentNo)) // 학번순
+                .map(student -> new SubmissionRow(student, submissionByStudent.get(student.getId())))
+                .toList();
+
+        return new SubmissionStatusView(assignment, rows);
     }
 
     /**

@@ -67,6 +67,8 @@
                                class="ml-2 small text-gray-600" th:title="${assignment.fileOriginalName}">
                                 <i class="fas fa-paperclip"></i> 첨부
                             </a>
+                            <a th:href="@{/instructor/assignments/{id}/submissions(id=${assignment.id})}"
+                               class="btn btn-outline-primary btn-sm float-right">제출 현황</a>
                         </td>
                         <td class="small"
                             th:text="${#temporals.format(assignment.startAt, 'MM-dd HH:mm')} + ' ~ ' + ${#temporals.format(assignment.endAt, 'MM-dd HH:mm')}">

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>제출 현황</title>
+    <link th:href="@{/vendor/datatables/dataTables.bootstrap4.min.css}" rel="stylesheet">
+</head>
+<body>
+
+<div layout:fragment="content" th:with="assignment=${view.assignment}">
+
+    <a th:href="@{/instructor/courses/{id}(id=${assignment.course.id})}" class="small">
+        &larr; <span th:text="${assignment.course.title}">강좌</span>
+    </a>
+
+    <!-- 과제 정보 -->
+    <h1 class="h3 mt-3 mb-1 text-gray-800">
+        <span th:text="${assignment.title}">과제</span>
+        <span class="badge align-middle" th:classappend="${assignment.status.badgeClass}"
+              th:text="${assignment.status.label}">진행중</span>
+    </h1>
+    <p class="small text-gray-600 mb-4"
+       th:text="${#temporals.format(assignment.startAt, 'yyyy-MM-dd HH:mm')} + ' ~ ' + ${#temporals.format(assignment.endAt, 'yyyy-MM-dd HH:mm')} + ' · 배점 ' + ${assignment.maxScore}">
+        기간 · 배점
+    </p>
+
+    <!-- 요약 카드 (SB Admin 2 카드) -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2"><div class="card-body">
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">수강생</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${view.totalCount()}">0</div>
+            </div></div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2"><div class="card-body">
+                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">제출</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${view.submittedCount()}">0</div>
+            </div></div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2"><div class="card-body">
+                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">미제출</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${view.notSubmittedCount()}">0</div>
+            </div></div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2"><div class="card-body">
+                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">채점 완료</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${view.gradedCount()}">0</div>
+            </div></div>
+        </div>
+    </div>
+
+    <!-- 제출/미제출 표 (DataTables: 검색, 정렬) -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+
+            <p th:if="${view.rows.isEmpty()}" class="text-center text-gray-500 my-3">
+                아직 수강생이 없습니다.
+            </p>
+
+            <div class="table-responsive" th:unless="${view.rows.isEmpty()}">
+                <table class="table table-bordered table-hover" id="submissionTable" width="100%">
+                    <thead class="thead-light">
+                    <tr>
+                        <th>학번</th>
+                        <th>이름</th>
+                        <th>상태</th>
+                        <th>제출일시</th>
+                        <th>첨부</th>
+                        <th>점수</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="row : ${view.rows}" th:classappend="${!row.submitted} ? 'table-danger'">
+                        <td th:text="${row.student.studentNo}">2026001</td>
+                        <td th:text="${row.student.name}">홍길동</td>
+                        <td>
+                            <span th:if="${row.submitted}" class="badge"
+                                  th:classappend="${row.submission.status.badgeClass}"
+                                  th:text="${row.submission.status.label}">제출됨</span>
+                            <span th:unless="${row.submitted}" class="badge badge-danger">미제출</span>
+                        </td>
+                        <td th:text="${row.submitted} ? ${#temporals.format(row.submission.submittedAt, 'yyyy-MM-dd HH:mm')} : '-'">-</td>
+                        <td>
+                            <a th:if="${row.submitted and row.submission.hasFile()}"
+                               th:href="@{/submissions/{id}/file(id=${row.submission.id})}"
+                               th:title="${row.submission.fileOriginalName}">
+                                <i class="fas fa-paperclip"></i>
+                            </a>
+                        </td>
+                        <td th:text="${row.submitted and row.submission.graded} ? ${row.submission.score} : '-'">-</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- 이 페이지에서만 쓰는 스크립트: DataTables -->
+<th:block layout:fragment="script">
+    <script th:src="@{/vendor/datatables/jquery.dataTables.min.js}"></script>
+    <script th:src="@{/vendor/datatables/dataTables.bootstrap4.min.js}"></script>
+    <!-- th:inline="none": 안의 JS 2차원 배열 대괄호를 Thymeleaf 인라인 식으로 해석하지 않게 -->
+    <script th:inline="none">
+        $('#submissionTable').DataTable({
+            order: [[0, 'asc']], // 학번순
+            pageLength: 25,
+            language: {
+                search: '검색:',
+                lengthMenu: '_MENU_ 명씩 보기',
+                info: '전체 _TOTAL_명 중 _START_ ~ _END_',
+                infoEmpty: '0명',
+                infoFiltered: '(전체 _MAX_명에서 검색)',
+                zeroRecords: '검색 결과가 없습니다.',
+                paginate: {previous: '이전', next: '다음'}
+            }
+        });
+    </script>
+</th:block>
+
+</body>
+</html>
