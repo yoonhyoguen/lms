@@ -1,6 +1,7 @@
 package com.ync.lms.repository;
 
 import com.ync.lms.domain.Submission;
+import com.ync.lms.domain.SubmissionStatus;
 import com.ync.lms.dto.AssignmentSubmissionStat;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,6 +23,9 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
     // S4 학생: 내 제출 목록 (최근 제출순)
     List<Submission> findByStudentIdOrderBySubmittedAtDesc(Long studentId);
+
+    // 강사 대시보드: 내 강좌들의 채점 대기(SUBMITTED) 수
+    long countByAssignmentCourseInstructorIdAndStatus(Long instructorId, SubmissionStatus status);
 
     // I6 통계: 강좌의 모든 제출물 (과제별 미제출자 계산용)
     List<Submission> findByAssignmentCourseId(Long courseId);
