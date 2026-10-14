@@ -23,6 +23,13 @@
             <span>대시보드</span></a>
     </li>
 
+    <!-- 공통: 마감 캘린더 (추가 기능) -->
+    <li class="nav-item">
+        <a class="nav-link" th:href="@{/calendar}">
+            <i class="fas fa-fw fa-calendar-alt"></i>
+            <span>캘린더</span></a>
+    </li>
+
     <!-- ===== 강사 메뉴 ===== -->
     <th:block sec:authorize="hasRole('INSTRUCTOR')">
         <hr class="sidebar-divider">

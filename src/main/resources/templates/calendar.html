@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>캘린더</title>
+    <style>
+        .cal-table { table-layout: fixed; }
+        .cal-table td { height: 110px; vertical-align: top; padding: 4px 6px; }
+        .cal-table .other-month { background: #f8f9fc; color: #b7b9cc; }
+        .cal-table .today { background: #eef3ff; }
+        .cal-table .today .day-num { background: #4e73df; color: #fff; border-radius: 50%; padding: 1px 6px; }
+        .cal-item { display: block; font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cal-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 3px; }
+        .cal-item.done { color: #858796; text-decoration: line-through; }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <!-- 월 이동 -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h1 class="h3 mb-0 text-gray-800">
+            <a th:href="@{/calendar(month=${cal.previous()})}" class="btn btn-light btn-sm mr-1" title="이전 달">
+                <i class="fas fa-chevron-left"></i></a>
+            <span th:text="${cal.month.year} + '년 ' + ${cal.month.monthValue} + '월'">2026년 10월</span>
+            <a th:href="@{/calendar(month=${cal.next()})}" class="btn btn-light btn-sm ml-1" title="다음 달">
+                <i class="fas fa-chevron-right"></i></a>
+        </h1>
+        <div>
+            <span class="small text-gray-600 mr-2" th:text="'이번 달 마감 ' + ${cal.dueCount()} + '개'">이번 달 마감 3개</span>
+            <a th:href="@{/calendar}" class="btn btn-outline-primary btn-sm">오늘</a>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered cal-table mb-0">
+                    <thead class="thead-light text-center">
+                    <tr>
+                        <th class="text-danger">일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th class="text-primary">토</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="week : ${cal.weeks}">
+                        <td th:each="day : ${week}"
+                            th:classappend="${!day.inMonth} ? 'other-month' : (${day.today} ? 'today')">
+                            <div class="small mb-1">
+                                <span class="day-num" th:text="${day.date.dayOfMonth}">1</span>
+                            </div>
+                            <!-- 이 날 마감인 과제 (● = 강좌 색) -->
+                            <th:block th:each="a : ${day.dueAssignments}"
+                                      th:with="done=${cal.submittedAssignmentIds.contains(a.id)}">
+                                <a class="cal-item"
+                                   th:classappend="${done} ? 'done' : 'font-weight-bold text-gray-800'"
+                                   th:href="${cal.instructor} ? @{/instructor/assignments/{id}/submissions(id=${a.id})} : @{/student/assignments/{id}(id=${a.id})}"
+                                   th:title="${a.course.title} + ' · ' + ${a.title} + ' (' + ${#temporals.format(a.endAt, 'HH:mm')} + ' 마감)'">
+                                    <span class="cal-dot" th:style="'background:' + ${a.course.color}"></span><span
+                                        th:if="${done}">✓ </span><span th:text="${a.title}">과제</span>
+                                </a>
+                            </th:block>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <p class="small text-gray-500">
+        ● 강좌 색 · 과제 이름에 마우스를 올리면 강좌와 마감 시각이 보입니다.
+        <span th:unless="${cal.instructor}">✓ 표시는 이미 제출한 과제입니다.</span>
+    </p>
+
+</div>
+
+</body>
+</html>
