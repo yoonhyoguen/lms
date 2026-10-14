@@ -27,6 +27,10 @@ spring:
       max-file-size: 10MB     # 파일 1개 최대
       max-request-size: 11MB  # 요청 전체 최대 (파일 + 폼 값)
 
+server:
+  tomcat:
+    max-swallow-size: -1 # 큰 파일도 끝까지 받은 뒤 "10MB 초과" 알림을 보여주기 위함 (기본값이면 연결이 끊김)
+
 # 우리 앱 설정: 업로드 파일 저장 폴더 (프로젝트 폴더 기준)
 app:
   upload-dir: ./uploads

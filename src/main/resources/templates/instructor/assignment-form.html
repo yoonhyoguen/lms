@@ -20,7 +20,7 @@
         <div class="card-body">
             <form th:action="${assignment} ? @{/instructor/assignments/{id}/edit(id=${assignment.id})}
                                            : @{/instructor/assignments/new(courseId=${course.id})}"
-                  th:object="${assignmentForm}" method="post" novalidate>
+                  th:object="${assignmentForm}" method="post" enctype="multipart/form-data" novalidate>
 
                 <div class="form-group">
                     <label for="title">제목 <span class="text-danger">*</span></label>
@@ -59,6 +59,24 @@
                     <input type="number" th:field="*{maxScore}" class="form-control" min="1" max="1000"
                            th:classappend="${#fields.hasErrors('maxScore')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:errors="*{maxScore}"></div>
+                </div>
+
+                <!-- 첨부파일 (선택, 1개) -->
+                <div class="form-group">
+                    <label for="file">첨부파일 <span class="small text-gray-500">(선택, 10MB 이하)</span></label>
+
+                    <!-- 수정 모드 + 기존 파일 있음 → 현재 파일 표시 -->
+                    <div th:if="${assignment != null and assignment.hasFile()}" class="small mb-2">
+                        현재 파일:
+                        <a th:href="@{/assignments/{id}/file(id=${assignment.id})}"
+                           th:text="${assignment.fileOriginalName}">파일.pdf</a>
+                        <span class="text-gray-500">(새 파일을 고르면 교체됩니다)</span>
+                    </div>
+
+                    <input type="file" id="file" name="file" class="form-control-file">
+                    <small class="text-gray-500" th:if="${#fields.hasAnyErrors()}">
+                        입력 오류가 있으면 파일 선택이 초기화됩니다. 다시 선택해 주세요.
+                    </small>
                 </div>
 
                 <button type="submit" class="btn btn-primary"

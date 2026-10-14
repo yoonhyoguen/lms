@@ -66,6 +66,23 @@ public class Assignment {
         this.maxScore = maxScore;
     }
 
+    // ===== 첨부파일 =====
+
+    public boolean hasFile() {
+        return fileStoredName != null;
+    }
+
+    /**
+     * 첨부파일 교체
+     * @return 이전에 저장돼 있던 파일 이름 (지워야 할 파일, 없으면 null)
+     */
+    public String changeFile(String originalName, String storedName) {
+        String oldStoredName = this.fileStoredName;
+        this.fileOriginalName = originalName;
+        this.fileStoredName = storedName;
+        return oldStoredName;
+    }
+
     // ===== 상태 계산 =====
 
     // S2 배지: 예정 / 진행중 / 마감

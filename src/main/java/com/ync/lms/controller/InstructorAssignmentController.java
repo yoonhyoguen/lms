@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
@@ -54,10 +55,11 @@ public class InstructorAssignmentController {
                          @RequestParam Long courseId,
                          @Valid @ModelAttribute AssignmentForm assignmentForm,
                          BindingResult bindingResult,
+                         @RequestParam(required = false) MultipartFile file, // 첨부 (선택)
                          Model model) {
         if (!bindingResult.hasErrors()) {
             try {
-                assignmentService.create(courseId, assignmentForm, loginUser.getId());
+                assignmentService.create(courseId, assignmentForm, file, loginUser.getId());
                 return "redirect:/instructor/courses/" + courseId;
             } catch (FieldValidationException e) {
                 bindingResult.rejectValue(e.getField(), "invalid", e.getMessage()); // B7
@@ -94,12 +96,13 @@ public class InstructorAssignmentController {
                        @PathVariable Long assignmentId,
                        @Valid @ModelAttribute AssignmentForm assignmentForm,
                        BindingResult bindingResult,
+                       @RequestParam(required = false) MultipartFile file, // 새 첨부 (선택)
                        Model model,
                        RedirectAttributes redirectAttributes) {
         Assignment assignment = assignmentService.getMyAssignment(assignmentId, loginUser.getId()); // B5
         if (!bindingResult.hasErrors()) {
             try {
-                assignmentService.update(assignmentId, assignmentForm, loginUser.getId());
+                assignmentService.update(assignmentId, assignmentForm, file, loginUser.getId());
                 redirectAttributes.addFlashAttribute("message", "과제가 수정되었습니다.");
                 return "redirect:/instructor/courses/" + assignment.getCourse().getId();
             } catch (FieldValidationException e) {

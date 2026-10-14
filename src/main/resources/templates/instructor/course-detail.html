@@ -63,6 +63,10 @@
                         <td>
                             <a th:href="@{/instructor/assignments/{id}/edit(id=${assignment.id})}"
                                th:text="${assignment.title}">과제 제목</a>
+                            <a th:if="${assignment.hasFile()}" th:href="@{/assignments/{id}/file(id=${assignment.id})}"
+                               class="ml-2 small text-gray-600" th:title="${assignment.fileOriginalName}">
+                                <i class="fas fa-paperclip"></i> 첨부
+                            </a>
                         </td>
                         <td class="small"
                             th:text="${#temporals.format(assignment.startAt, 'MM-dd HH:mm')} + ' ~ ' + ${#temporals.format(assignment.endAt, 'MM-dd HH:mm')}">
