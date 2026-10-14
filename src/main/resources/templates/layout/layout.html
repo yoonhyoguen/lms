@@ -24,6 +24,12 @@
             <!-- 상단바 -->
             <div th:replace="~{fragments/topbar :: topbar}"></div>
 
+            <!-- 공통 알림 (redirect 후 한 번만 보이는 flash 메시지) -->
+            <div class="container-fluid" th:if="${message != null or error != null}">
+                <div th:if="${message}" class="alert alert-success" th:text="${message}">성공</div>
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}">규칙 위반</div>
+            </div>
+
             <!-- 각 페이지 내용이 들어가는 자리 -->
             <div class="container-fluid" layout:fragment="content"></div>
 

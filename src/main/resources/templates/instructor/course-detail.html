@@ -60,7 +60,10 @@
                             <span class="badge" th:classappend="${assignment.status.badgeClass}"
                                   th:text="${assignment.status.label}">진행중</span>
                         </td>
-                        <td th:text="${assignment.title}">과제 제목</td>
+                        <td>
+                            <a th:href="@{/instructor/assignments/{id}/edit(id=${assignment.id})}"
+                               th:text="${assignment.title}">과제 제목</a>
+                        </td>
                         <td class="small"
                             th:text="${#temporals.format(assignment.startAt, 'MM-dd HH:mm')} + ' ~ ' + ${#temporals.format(assignment.endAt, 'MM-dd HH:mm')}">
                             10-14 09:00 ~ 10-20 23:59

@@ -4,7 +4,8 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
 <head>
-    <title>과제 등록</title>
+    <!-- 등록/수정 같은 화면 사용: assignment 가 있으면 수정 모드 -->
+    <title th:text="${assignment} ? '과제 수정' : '과제 등록'">과제 등록</title>
 </head>
 <body>
 
@@ -13,11 +14,12 @@
     <a th:href="@{/instructor/courses/{id}(id=${course.id})}" class="small">
         &larr; <span th:text="${course.title}">강좌</span>
     </a>
-    <h1 class="h3 my-3 text-gray-800">과제 등록</h1>
+    <h1 class="h3 my-3 text-gray-800" th:text="${assignment} ? '과제 수정' : '과제 등록'">과제 등록</h1>
 
     <div class="card shadow mb-4" style="max-width: 720px;">
         <div class="card-body">
-            <form th:action="@{/instructor/assignments/new(courseId=${course.id})}"
+            <form th:action="${assignment} ? @{/instructor/assignments/{id}/edit(id=${assignment.id})}
+                                           : @{/instructor/assignments/new(courseId=${course.id})}"
                   th:object="${assignmentForm}" method="post" novalidate>
 
                 <div class="form-group">
@@ -59,11 +61,20 @@
                     <div class="invalid-feedback" th:errors="*{maxScore}"></div>
                 </div>
 
-                <button type="submit" class="btn btn-primary">등록하기</button>
+                <button type="submit" class="btn btn-primary"
+                        th:text="${assignment} ? '저장하기' : '등록하기'">등록하기</button>
                 <a th:href="@{/instructor/courses/{id}(id=${course.id})}" class="btn btn-secondary">취소</a>
             </form>
         </div>
     </div>
+
+    <!-- 수정 모드에서만: 삭제 (별도 form, POST) -->
+    <form th:if="${assignment}" th:action="@{/instructor/assignments/{id}/delete(id=${assignment.id})}"
+          method="post" onsubmit="return confirm('이 과제를 삭제할까요? 되돌릴 수 없습니다.');">
+        <button type="submit" class="btn btn-outline-danger btn-sm">
+            <i class="fas fa-trash fa-sm"></i> 과제 삭제
+        </button>
+    </form>
 
 </div>
 
