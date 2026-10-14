@@ -41,6 +41,16 @@ public class User {
         this.createdAt = LocalDateTime.now();
     }
 
+    // ===== 내 정보 수정 (이메일·학번·역할은 바꿀 수 없음) =====
+
+    public void changeName(String name) {
+        this.name = name;
+    }
+
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
     // ===== 생성 메서드: 역할별로 필요한 값만 받도록 =====
 
     public static User createStudent(String studentNo, String name, String email, String encodedPassword) {

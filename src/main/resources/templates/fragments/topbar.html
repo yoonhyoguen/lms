@@ -23,6 +23,11 @@
             </a>
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                  aria-labelledby="userDropdown">
+                <a class="dropdown-item" th:href="@{/me}">
+                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                    내 정보
+                </a>
+                <div class="dropdown-divider"></div>
                 <!-- 로그아웃은 반드시 POST (CSRF 토큰은 th:action 이 자동으로 넣어줌) -->
                 <form th:action="@{/logout}" method="post">
                     <button type="submit" class="dropdown-item">

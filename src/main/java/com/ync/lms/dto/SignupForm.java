@@ -2,6 +2,7 @@ package com.ync.lms.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -28,8 +29,9 @@ public class SignupForm {
     @Size(max = 100, message = "이메일은 100자 이하로 입력하세요.")
     private String email;
 
-    @NotBlank(message = "비밀번호를 입력하세요.")
-    @Size(min = 8, max = 64, message = "비밀번호는 8~64자로 입력하세요.")
+    // 빈 값(0자)도 @Size(min=8) 에 걸리므로 @NotBlank 를 같이 쓰면 메시지가 2줄 → @NotNull + @Size 로 하나만
+    @NotNull(message = "비밀번호를 입력하세요.")
+    @Size(min = 8, max = 64, message = "비밀번호를 8~64자로 입력하세요.")
     private String password;
 
     @NotBlank(message = "비밀번호 확인을 입력하세요.")

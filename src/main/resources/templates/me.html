@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>내 정보</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <h1 class="h3 mb-4 text-gray-800">내 정보</h1>
+
+    <div class="row">
+        <!-- 내 정보 (이름만 수정) -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">기본 정보</h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-3">
+                        <dt class="col-sm-3">역할</dt>
+                        <dd class="col-sm-9" th:text="${user.role.name() == 'INSTRUCTOR'} ? '강사' : '학생'">학생</dd>
+                        <dt class="col-sm-3">이메일</dt>
+                        <dd class="col-sm-9">
+                            <span th:text="${user.email}">hong@lms.com</span>
+                            <small class="text-gray-500">(로그인 아이디, 변경 불가)</small>
+                        </dd>
+                        <th:block th:if="${user.studentNo}">
+                            <dt class="col-sm-3">학번</dt>
+                            <dd class="col-sm-9">
+                                <span th:text="${user.studentNo}">2026001</span>
+                                <small class="text-gray-500">(변경 불가)</small>
+                            </dd>
+                        </th:block>
+                    </dl>
+
+                    <form th:action="@{/me/profile}" th:object="${profileForm}" method="post" novalidate>
+                        <div class="form-group">
+                            <label for="name">이름</label>
+                            <input type="text" th:field="*{name}" class="form-control"
+                                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{name}"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">이름 저장</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 비밀번호 변경 -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">비밀번호 변경</h6>
+                </div>
+                <div class="card-body">
+                    <!-- 비밀번호는 실패해도 다시 채워 넣지 않도록 th:field 대신 name 만 사용 -->
+                    <form th:action="@{/me/password}" th:object="${passwordChangeForm}" method="post" novalidate>
+                        <div class="form-group">
+                            <label for="currentPassword">현재 비밀번호</label>
+                            <input type="password" id="currentPassword" name="currentPassword" class="form-control"
+                                   th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{currentPassword}"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">새 비밀번호 <small class="text-gray-500">(8자 이상)</small></label>
+                            <input type="password" id="newPassword" name="newPassword" class="form-control"
+                                   th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{newPassword}"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPasswordConfirm">새 비밀번호 확인</label>
+                            <input type="password" id="newPasswordConfirm" name="newPasswordConfirm" class="form-control"
+                                   th:classappend="${#fields.hasErrors('newPasswordConfirm')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{newPasswordConfirm}"></div>
+                        </div>
+                        <button type="submit" class="btn btn-warning">비밀번호 변경</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
