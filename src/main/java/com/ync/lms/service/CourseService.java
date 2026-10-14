@@ -3,8 +3,11 @@ package com.ync.lms.service;
 import com.ync.lms.domain.Course;
 import com.ync.lms.domain.User;
 import com.ync.lms.dto.CourseForm;
+import com.ync.lms.exception.BusinessRuleException;
 import com.ync.lms.exception.NotFoundException;
+import com.ync.lms.repository.AssignmentRepository;
 import com.ync.lms.repository.CourseRepository;
+import com.ync.lms.repository.EnrollmentRepository;
 import com.ync.lms.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,6 +31,8 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final AssignmentRepository assignmentRepository;
 
     /**
      * I1 강좌 개설: 참여코드를 자동 발급해서 저장한다.
@@ -64,6 +69,41 @@ public class CourseService {
             throw new AccessDeniedException("본인 강좌가 아닙니다.");
         }
         return course;
+    }
+
+    // ===== 추가 기능: 강좌 수정 · 참여코드 재발급 · 삭제 =====
+
+    @Transactional
+    public void update(Long courseId, CourseForm form, Long instructorId) {
+        Course course = getMyCourse(courseId, instructorId); // B5
+        course.update(form.getTitle(), form.getDescription());
+    }
+
+    /**
+     * 참여코드 재발급. 이미 등록한 학생은 수강 명단(Enrollment)에 있으므로 영향 없음.
+     * @return 새 참여코드
+     */
+    @Transactional
+    public String regenerateJoinCode(Long courseId, Long instructorId) {
+        Course course = getMyCourse(courseId, instructorId); // B5
+        String newCode = generateUniqueJoinCode();            // I1 과 같은 생성 방식 재사용
+        course.changeJoinCode(newCode);
+        return newCode;
+    }
+
+    /**
+     * 강좌 삭제: 수강생이나 과제가 하나라도 있으면 불가 (B8 과 같은 방식)
+     */
+    @Transactional
+    public void delete(Long courseId, Long instructorId) {
+        Course course = getMyCourse(courseId, instructorId); // B5
+        if (enrollmentRepository.existsByCourseId(courseId)) {
+            throw new BusinessRuleException("수강생이 있는 강좌는 삭제할 수 없습니다.");
+        }
+        if (assignmentRepository.existsByCourseId(courseId)) {
+            throw new BusinessRuleException("과제가 있는 강좌는 삭제할 수 없습니다.");
+        }
+        courseRepository.delete(course);
     }
 
     // ===== 참여코드 생성 =====

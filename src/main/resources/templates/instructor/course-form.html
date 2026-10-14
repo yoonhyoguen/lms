@@ -4,17 +4,22 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
 <head>
-    <title>강좌 개설</title>
+    <!-- 개설/수정 같은 화면 사용: course 가 있으면 수정 모드 -->
+    <title th:text="${course} ? '강좌 수정' : '강좌 개설'">강좌 개설</title>
 </head>
 <body>
 
 <div layout:fragment="content">
 
-    <h1 class="h3 mb-4 text-gray-800">강좌 개설</h1>
+    <a th:if="${course}" th:href="@{/instructor/courses/{id}(id=${course.id})}" class="small">
+        &larr; <span th:text="${course.title}">강좌</span>
+    </a>
+    <h1 class="h3 my-3 text-gray-800" th:text="${course} ? '강좌 수정' : '강좌 개설'">강좌 개설</h1>
 
     <div class="card shadow mb-4" style="max-width: 720px;">
         <div class="card-body">
-            <form th:action="@{/instructor/courses/new}" th:object="${courseForm}" method="post" novalidate>
+            <form th:action="${course} ? @{/instructor/courses/{id}/edit(id=${course.id})} : @{/instructor/courses/new}"
+                  th:object="${courseForm}" method="post" novalidate>
 
                 <div class="form-group">
                     <label for="title">강좌명 <span class="text-danger">*</span></label>
@@ -32,13 +37,23 @@
                     <div class="invalid-feedback" th:errors="*{description}"></div>
                 </div>
 
-                <p class="small text-gray-500">참여코드는 개설 시 자동으로 발급됩니다.</p>
+                <p th:unless="${course}" class="small text-gray-500">참여코드는 개설 시 자동으로 발급됩니다.</p>
 
-                <button type="submit" class="btn btn-primary">개설하기</button>
-                <a th:href="@{/instructor/courses}" class="btn btn-secondary">취소</a>
+                <button type="submit" class="btn btn-primary" th:text="${course} ? '저장하기' : '개설하기'">개설하기</button>
+                <a th:href="${course} ? @{/instructor/courses/{id}(id=${course.id})} : @{/instructor/courses}"
+                   class="btn btn-secondary">취소</a>
             </form>
         </div>
     </div>
+
+    <!-- 수정 모드에서만: 강좌 삭제 (수강생·과제가 있으면 서버에서 거부) -->
+    <form th:if="${course}" th:action="@{/instructor/courses/{id}/delete(id=${course.id})}" method="post"
+          onsubmit="return confirm('이 강좌를 삭제할까요? 되돌릴 수 없습니다.');">
+        <button type="submit" class="btn btn-outline-danger btn-sm">
+            <i class="fas fa-trash fa-sm"></i> 강좌 삭제
+        </button>
+        <span class="small text-gray-500 ml-2">수강생이나 과제가 있는 강좌는 삭제할 수 없습니다.</span>
+    </form>
 
 </div>
 

@@ -47,6 +47,17 @@ public class Course {
         return course;
     }
 
+    // 추가 기능: 강좌 수정 (강사는 바꿀 수 없음)
+    public void update(String title, String description) {
+        this.title = title;
+        this.description = description;
+    }
+
+    // 추가 기능: 참여코드 재발급
+    public void changeJoinCode(String joinCode) {
+        this.joinCode = joinCode;
+    }
+
     // B5: 이 강좌를 개설한 강사인가?
     public boolean isOwnedBy(Long userId) {
         return instructor.getId().equals(userId);

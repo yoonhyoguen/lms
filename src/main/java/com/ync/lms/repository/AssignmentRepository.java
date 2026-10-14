@@ -14,6 +14,9 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     // S2 학생: 수강 중인 여러 강좌의 과제를 한 번에 (마감 빠른 순)
     List<Assignment> findByCourseIdInOrderByEndAtAsc(List<Long> courseIds);
 
+    // 강좌 삭제 규칙: 과제가 있나?
+    boolean existsByCourseId(Long courseId);
+
     // 강사 대시보드: 현재 진행중인 과제 수 (시작일시 ≤ now ≤ 종료일시)
     long countByCourseInstructorIdAndStartAtLessThanEqualAndEndAtGreaterThanEqual(
             Long instructorId, LocalDateTime now1, LocalDateTime now2);
