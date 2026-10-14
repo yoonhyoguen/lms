@@ -5,8 +5,13 @@ import com.ync.lms.dto.GradeForm;
 import com.ync.lms.exception.FieldValidationException;
 import com.ync.lms.security.LoginUser;
 import com.ync.lms.service.SubmissionService;
+import com.ync.lms.util.CsvWriter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,12 +22,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
 /**
  * 강사: 제출 현황(I4), 채점(I5)
  */
 @Controller
 @RequiredArgsConstructor
 public class InstructorSubmissionController {
+
+    private static final DateTimeFormatter CSV_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private final SubmissionService submissionService;
 
@@ -33,6 +44,40 @@ public class InstructorSubmissionController {
                               Model model) {
         model.addAttribute("view", submissionService.getSubmissionStatus(assignmentId, loginUser.getId())); // B5
         return "instructor/submissions";
+    }
+
+    // 추가 기능: 제출 현황 CSV 다운로드 (엑셀에서 바로 열림)
+    @GetMapping("/instructor/assignments/{assignmentId}/submissions.csv")
+    public ResponseEntity<byte[]> submissionsCsv(@AuthenticationPrincipal LoginUser loginUser,
+                                                 @PathVariable Long assignmentId) {
+        SubmissionService.SubmissionStatusView view =
+                submissionService.getSubmissionStatus(assignmentId, loginUser.getId()); // B5
+        int maxScore = view.assignment().getMaxScore();
+
+        List<List<String>> rows = view.rows().stream()
+                .map(row -> {
+                    Submission s = row.submission();
+                    return List.of(
+                            row.student().getStudentNo(),
+                            row.student().getName(),
+                            row.student().getEmail(),
+                            s == null ? "미제출" : s.getStatus().getLabel(),
+                            s == null ? "" : s.getSubmittedAt().format(CSV_TIME),
+                            (s != null && s.isGraded()) ? String.valueOf(s.getScore()) : "",
+                            String.valueOf(maxScore),
+                            (s != null && s.getFeedback() != null) ? s.getFeedback() : "");
+                })
+                .toList();
+
+        byte[] csv = CsvWriter.toBytes(
+                List.of("학번", "이름", "이메일", "상태", "제출일시", "점수", "배점", "피드백"), rows);
+
+        String filename = view.assignment().getCourse().getTitle() + "_" + view.assignment().getTitle() + "_제출현황.csv";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment().filename(filename, StandardCharsets.UTF_8).build().toString())
+                .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
+                .body(csv);
     }
 
     // I5 채점 화면

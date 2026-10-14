@@ -16,6 +16,10 @@
     </a>
 
     <!-- 과제 정보 -->
+    <a th:href="@{/instructor/assignments/{id}/submissions.csv(id=${assignment.id})}"
+       class="btn btn-success btn-sm shadow-sm float-right mt-3">
+        <i class="fas fa-file-download fa-sm"></i> CSV 다운로드
+    </a>
     <h1 class="h3 mt-3 mb-1 text-gray-800">
         <span th:text="${assignment.title}">과제</span>
         <span class="badge align-middle" th:classappend="${assignment.status.badgeClass}"

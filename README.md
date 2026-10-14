@@ -80,6 +80,7 @@ REST API 대신 **서버 렌더링(Controller → Model → Thymeleaf)** 으로 
 | 내 정보 · 비밀번호 변경 | `/me` — 이름 변경(세션 로그인 정보 즉시 갱신), 현재 비밀번호 확인 후 변경 (현재와 같은 비밀번호 불가) |
 | 강좌 수정 · 삭제 | 강좌명·설명 수정, **수강생이나 과제가 있으면 삭제 불가** (B8 과 같은 방식), B5 본인 강좌만 |
 | 참여코드 재발급 | 코드 유출 시 새 코드로 교체 (이미 등록한 학생은 유지, 옛 코드로는 등록 불가) |
+| 성적 CSV 다운로드 | 제출 현황 → 학번·이름·상태·점수·피드백 CSV. UTF-8 BOM(엑셀 한글), 쉼표·따옴표·줄바꿈 처리, **CSV 인젝션 방지** |
 
 ---
 
@@ -115,7 +116,7 @@ REST API 대신 **서버 렌더링(Controller → Model → Thymeleaf)** 으로 
 | 강사 | `/instructor/courses` · `/new` · `/{id}` | 내 강좌 · 개설 · 상세(참여코드, 과제, 수강생) |
 | 강사 | `/instructor/courses/{id}/edit` | 강좌 수정 · 삭제, 참여코드 재발급 (추가 기능) |
 | 강사 | `/instructor/assignments/new` · `/{id}/edit` | 과제 등록 · 수정/삭제 |
-| 강사 | `/instructor/assignments/{id}/submissions` | 제출 현황 + 미제출자 |
+| 강사 | `/instructor/assignments/{id}/submissions` | 제출 현황 + 미제출자 (`.csv` 다운로드) |
 | 강사 | `/instructor/submissions/{id}/grade` | 채점 · 피드백 |
 | 강사 | `/instructor/stats` | 통계 대시보드 |
 | 학생 | `/student/courses/join` | 참여코드 입력 + 수강 중인 강좌 |
@@ -162,6 +163,7 @@ src/main/resources
 |---|---|
 | `FileStorageServiceTest` (7) | UUID 저장, 같은 이름 덮어쓰기 방지, 경로 조작(`../`) 차단, 삭제 |
 | `SubmissionRepositoryTest` (2) | I6 group by 쿼리: 제출 수, 채점 수, 평균(채점 전 null 제외), 다른 강좌 미포함 |
+| `CsvWriterTest` (7) | 쉼표·따옴표·줄바꿈 처리, `=` `+` `-` `@` 수식 실행 방지, BOM, CRLF |
 | `LmsApplicationTests` (1) | 애플리케이션 시작 |
 
 이 외에 요구사항 ID 와 B1~B8 을 처음부터 끝까지 확인하는 **통합 점검 46개 항목**을 실제 서버에 요청을 보내는 방식으로 수행했습니다. (강사2의 남의 강좌 접근, 개발자도구로 막힌 버튼을 우회한 강제 제출 등 포함)
