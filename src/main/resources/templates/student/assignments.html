@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>내 과제</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <h1 class="h3 mb-4 text-gray-800">내 과제</h1>
+
+    <!-- 수강 강좌가 없거나 과제가 없을 때 -->
+    <div th:if="${#lists.isEmpty(assignments)}" class="card shadow mb-4">
+        <div class="card-body text-center text-gray-500 py-5">
+            아직 과제가 없습니다.
+            <a th:href="@{/student/courses/join}">수강 등록</a>을 했는지 확인하세요.
+        </div>
+    </div>
+
+    <div class="card shadow mb-4" th:unless="${#lists.isEmpty(assignments)}">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0">
+                    <thead class="thead-light">
+                    <tr>
+                        <th style="width: 90px;">상태</th>
+                        <th>강좌</th>
+                        <th>과제</th>
+                        <th>제출 기간</th>
+                        <th style="width: 80px;">배점</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="assignment : ${assignments}">
+                        <td>
+                            <span class="badge" th:classappend="${assignment.status.badgeClass}"
+                                  th:text="${assignment.status.label}">진행중</span>
+                        </td>
+                        <td class="small text-gray-600" th:text="${assignment.course.title}">강좌</td>
+                        <td>
+                            <a th:href="@{/student/assignments/{id}(id=${assignment.id})}"
+                               th:text="${assignment.title}">과제 제목</a>
+                            <i th:if="${assignment.hasFile()}" class="fas fa-paperclip small text-gray-500 ml-1"
+                               title="첨부파일 있음"></i>
+                        </td>
+                        <td class="small"
+                            th:text="${#temporals.format(assignment.startAt, 'MM-dd HH:mm')} + ' ~ ' + ${#temporals.format(assignment.endAt, 'MM-dd HH:mm')}">
+                            10-01 09:00 ~ 10-20 23:59
+                        </td>
+                        <td th:text="${assignment.maxScore}">100</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

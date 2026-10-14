@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>과제 상세</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <a th:href="@{/student/assignments}" class="small">&larr; 내 과제</a>
+
+    <div class="card shadow my-3">
+        <div class="card-header py-3">
+            <div class="small text-gray-500" th:text="${assignment.course.title}">강좌</div>
+            <h1 class="h4 mb-0 text-gray-800">
+                <span class="badge align-middle" th:classappend="${assignment.status.badgeClass}"
+                      th:text="${assignment.status.label}">진행중</span>
+                <span th:text="${assignment.title}">과제 제목</span>
+            </h1>
+        </div>
+        <div class="card-body">
+
+            <dl class="row mb-0">
+                <dt class="col-sm-2">제출 기간</dt>
+                <dd class="col-sm-10"
+                    th:text="${#temporals.format(assignment.startAt, 'yyyy-MM-dd HH:mm')} + ' ~ ' + ${#temporals.format(assignment.endAt, 'yyyy-MM-dd HH:mm')}">
+                    기간
+                </dd>
+
+                <dt class="col-sm-2">배점</dt>
+                <dd class="col-sm-10" th:text="${assignment.maxScore} + '점'">100점</dd>
+
+                <dt class="col-sm-2">첨부파일</dt>
+                <dd class="col-sm-10">
+                    <a th:if="${assignment.hasFile()}" th:href="@{/assignments/{id}/file(id=${assignment.id})}">
+                        <i class="fas fa-paperclip"></i> <span th:text="${assignment.fileOriginalName}">파일</span>
+                    </a>
+                    <span th:unless="${assignment.hasFile()}" class="text-gray-500">없음</span>
+                </dd>
+            </dl>
+
+            <hr>
+
+            <!-- 줄바꿈 유지 (th:text 라서 HTML 태그는 글자 그대로 표시됨 → 안전) -->
+            <div style="white-space: pre-wrap;"
+                 th:text="${assignment.content != null and !#strings.isEmpty(assignment.content)} ? ${assignment.content} : '내용 없음'">과제 내용</div>
+        </div>
+    </div>
+
+    <!-- W3 S3: 제출 영역이 여기에 들어갈 예정 -->
+
+</div>
+
+</body>
+</html>

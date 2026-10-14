@@ -71,6 +71,30 @@ public class AssignmentService {
     }
 
     /**
+     * S2 학생: 수강 중인 모든 강좌의 과제 (마감 빠른 순)
+     */
+    public List<Assignment> findForStudent(Long studentId) {
+        List<Long> courseIds = enrollmentRepository.findByStudentIdOrderByEnrolledAtDesc(studentId).stream()
+                .map(enrollment -> enrollment.getCourse().getId())
+                .toList();
+        if (courseIds.isEmpty()) {
+            return List.of(); // 수강 강좌가 없으면 조회할 필요 없음
+        }
+        return assignmentRepository.findByCourseIdInOrderByEndAtAsc(courseIds);
+    }
+
+    /**
+     * B2: 수강 등록된 학생만 과제 열람. 없으면 404, 수강생이 아니면 403
+     */
+    public Assignment getForStudent(Long assignmentId, Long studentId) {
+        Assignment assignment = findAssignment(assignmentId);
+        if (!enrollmentRepository.existsByCourseIdAndStudentId(assignment.getCourse().getId(), studentId)) {
+            throw new AccessDeniedException("수강 중인 강좌의 과제가 아닙니다.");
+        }
+        return assignment;
+    }
+
+    /**
      * 첨부파일 다운로드 권한: 강좌 주인 강사(B5) 또는 수강생(B2)
      */
     public Assignment getDownloadableAssignment(Long assignmentId, LoginUser loginUser) {
