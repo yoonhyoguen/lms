@@ -4,6 +4,7 @@ import com.ync.lms.domain.Assignment;
 import com.ync.lms.domain.Enrollment;
 import com.ync.lms.domain.Role;
 import com.ync.lms.domain.Submission;
+import com.ync.lms.domain.SubmissionStatus;
 import com.ync.lms.domain.User;
 import com.ync.lms.dto.GradeForm;
 import com.ync.lms.dto.SubmissionForm;
@@ -166,6 +167,13 @@ public class SubmissionService {
                 .toList();
 
         return new SubmissionStatusView(assignment, rows);
+    }
+
+    /**
+     * 학생 대시보드 "최근 피드백": 최근 채점된 과제 3개
+     */
+    public List<Submission> findRecentFeedback(Long studentId) {
+        return submissionRepository.findTop3ByStudentIdAndStatusOrderByGradedAtDesc(studentId, SubmissionStatus.GRADED);
     }
 
     /**

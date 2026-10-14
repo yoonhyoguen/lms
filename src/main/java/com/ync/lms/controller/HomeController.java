@@ -3,6 +3,7 @@ package com.ync.lms.controller;
 import com.ync.lms.domain.Role;
 import com.ync.lms.security.LoginUser;
 import com.ync.lms.service.StatsService;
+import com.ync.lms.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
 
     private final StatsService statsService;
+    private final SubmissionService submissionService;
 
     // 역할별 대시보드: 강사 = 요약 카드, 학생 = S5 내 통계
     @GetMapping("/")
@@ -23,6 +25,7 @@ public class HomeController {
         } else {
             StatsService.StudentHomeView studentHome = statsService.getStudentHome(loginUser.getId());
             model.addAttribute("studentHome", studentHome);
+            model.addAttribute("recentFeedback", submissionService.findRecentFeedback(loginUser.getId()));
 
             // 차트용 (채점된 과제의 내 점수, 100점 환산)
             model.addAttribute("chartLabels", studentHome.scored().stream().map(StatsService.ScoredAssignment::title).toList());

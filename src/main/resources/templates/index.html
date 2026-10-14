@@ -126,8 +126,37 @@
                 </div>
             </div>
 
-            <!-- 내 점수 차트 -->
+            <!-- 최근 피드백 (학교 LMS 오른쪽 패널 참고) -->
             <div class="col-lg-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-success"><i class="fas fa-comment-dots"></i> 최근 피드백</h6>
+                    </div>
+                    <div class="card-body">
+                        <p th:if="${#lists.isEmpty(recentFeedback)}" class="text-center text-gray-500 my-3">현재 없음</p>
+                        <ul class="list-group list-group-flush" th:unless="${#lists.isEmpty(recentFeedback)}">
+                            <li class="list-group-item px-0" th:each="s : ${recentFeedback}">
+                                <div class="d-flex align-items-center">
+                                    <a class="font-weight-bold"
+                                       th:href="@{/student/assignments/{id}(id=${s.assignment.id})}"
+                                       th:text="${s.assignment.title}">과제</a>
+                                    <span class="ml-auto font-weight-bold text-gray-800"
+                                          th:text="${s.score} + ' / ' + ${s.assignment.maxScore}">40 / 50</span>
+                                </div>
+                                <div class="small text-gray-500"
+                                     th:text="${s.assignment.course.title} + ' · ' + ${#temporals.format(s.gradedAt, 'MM-dd HH:mm')} + ' 채점'">강좌 · 일시</div>
+                                <div class="small text-gray-700 mt-1"
+                                     th:text="${s.feedback != null and !#strings.isEmpty(s.feedback)} ? ${#strings.abbreviate(s.feedback, 60)} : '(피드백 없음)'">피드백</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 내 점수 차트 -->
+            <div class="col-12 mb-4">
                 <div class="card shadow h-100">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">과제별 내 점수 (100점 환산)</h6>
