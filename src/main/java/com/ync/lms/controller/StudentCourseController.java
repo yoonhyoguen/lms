@@ -5,6 +5,7 @@ import com.ync.lms.dto.JoinCodeForm;
 import com.ync.lms.exception.FieldValidationException;
 import com.ync.lms.security.LoginUser;
 import com.ync.lms.service.EnrollmentService;
+import com.ync.lms.service.StudentCourseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,8 +14,10 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -23,6 +26,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class StudentCourseController {
 
     private final EnrollmentService enrollmentService;
+    private final StudentCourseService studentCourseService;
+
+    // 추가 기능: 학생 강좌 홈 (과제 + 내 성적표)  /student/courses/3?gradedOnly=false
+    @GetMapping("/{courseId}")
+    public String home(@AuthenticationPrincipal LoginUser loginUser,
+                       @PathVariable Long courseId,
+                       @RequestParam(defaultValue = "true") boolean gradedOnly, // 평가된 과제에만 근거한 계산 (기본 체크)
+                       Model model) {
+        model.addAttribute("view", studentCourseService.getCourseHome(courseId, loginUser.getId(), gradedOnly)); // B2
+        return "student/course-home";
+    }
 
     // S1 수강 등록 화면 (+ 수강 중인 강좌 목록)
     @GetMapping("/join")

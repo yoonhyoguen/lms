@@ -45,8 +45,12 @@
                 <!-- 강좌 색 띠 (강사 화면과 같은 색) -->
                 <div class="rounded-top" th:style="'height: 64px; background:' + ${enrollment.course.color}"></div>
                 <div class="card-body">
-                    <h5 class="font-weight-bold mb-1" th:style="'color:' + ${enrollment.course.color}"
-                        th:text="${enrollment.course.title}">강좌명</h5>
+                    <!-- stretched-link: 카드 전체를 누르면 강좌 홈으로 -->
+                    <h5 class="font-weight-bold mb-1">
+                        <a th:href="@{/student/courses/{id}(id=${enrollment.course.id})}" class="stretched-link"
+                           th:style="'color:' + ${enrollment.course.color}"
+                           th:text="${enrollment.course.title}">강좌명</a>
+                    </h5>
                     <div class="small text-gray-600 mb-2">
                         <i class="fas fa-chalkboard-teacher"></i>
                         <span th:text="${enrollment.course.instructor.name}">강사</span>

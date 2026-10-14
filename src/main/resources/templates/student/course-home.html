@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title th:text="${view.course.title}">강좌</title>
+</head>
+<body>
+
+<div layout:fragment="content" th:with="course=${view.course}">
+
+    <a th:href="@{/student/courses/join}" class="small">&larr; 수강 중인 강좌</a>
+
+    <!-- 강좌 정보 (카드와 같은 색) -->
+    <div class="card shadow my-3" th:style="'border-top: 6px solid ' + ${course.color}">
+        <div class="card-body">
+            <h1 class="h3 mb-1" th:style="'color:' + ${course.color}" th:text="${course.title}">강좌명</h1>
+            <div class="small text-gray-600 mb-2">
+                <i class="fas fa-chalkboard-teacher"></i> <span th:text="${course.instructor.name}">강사</span>
+            </div>
+            <p class="text-gray-600 mb-0"
+               th:text="${course.description != null and !#strings.isEmpty(course.description)} ? ${course.description} : '설명 없음'">설명</p>
+        </div>
+    </div>
+
+    <!-- 이 강좌의 과제 -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">과제</h6>
+        </div>
+        <div class="card-body">
+            <p th:if="${view.rows.isEmpty()}" class="text-center text-gray-500 my-3">아직 과제가 없습니다.</p>
+            <div class="table-responsive" th:unless="${view.rows.isEmpty()}">
+                <table class="table table-bordered table-hover mb-0">
+                    <thead class="thead-light">
+                    <tr>
+                        <th style="width: 90px;">상태</th>
+                        <th>과제</th>
+                        <th>제출 기간</th>
+                        <th style="width: 110px;">내 제출</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="row : ${view.rows}">
+                        <td><span class="badge" th:classappend="${row.assignment.status.badgeClass}"
+                                  th:text="${row.assignment.status.label}">진행중</span></td>
+                        <td>
+                            <a th:href="@{/student/assignments/{id}(id=${row.assignment.id})}"
+                               th:text="${row.assignment.title}">과제</a>
+                            <i th:if="${row.assignment.hasFile()}" class="fas fa-paperclip small text-gray-500 ml-1"></i>
+                        </td>
+                        <td class="small"
+                            th:text="${#temporals.format(row.assignment.startAt, 'MM-dd HH:mm')} + ' ~ ' + ${#temporals.format(row.assignment.endAt, 'MM-dd HH:mm')}">기간</td>
+                        <td><span class="badge" th:classappend="${row.myStatusBadge()}" th:text="${row.myStatusLabel()}">미제출</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 내 성적표 (학교 LMS 성적 화면 참고) -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">내 성적</h6>
+            <!-- 체크를 바꾸면 ?gradedOnly=true/false 로 다시 조회 -->
+            <div class="custom-control custom-checkbox small">
+                <input type="checkbox" class="custom-control-input" id="gradedOnly"
+                       th:checked="${view.gradedOnly}"
+                       onchange="location.href = '?gradedOnly=' + this.checked">
+                <label class="custom-control-label" for="gradedOnly">평가된 과제에만 근거한 계산</label>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                    <tr>
+                        <th>이름</th>
+                        <th>마감</th>
+                        <th>상태</th>
+                        <th class="text-right">점수</th>
+                        <th class="text-right">총점</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="row : ${view.rows}" th:classappend="${!row.started} ? 'text-gray-500'">
+                        <td th:text="${row.assignment.title}">과제</td>
+                        <td class="small" th:text="${#temporals.format(row.assignment.endAt, 'MM-dd HH:mm')}">마감</td>
+                        <td><span class="badge" th:classappend="${row.myStatusBadge()}" th:text="${row.myStatusLabel()}">미제출</span></td>
+                        <td class="text-right" th:text="${row.graded} ? ${row.submission.score} : '-'">-</td>
+                        <td class="text-right" th:text="${row.assignment.maxScore}">100</td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr class="h5 font-weight-bold">
+                        <td colspan="3">합계</td>
+                        <td class="text-right" colspan="2"
+                            th:text="${view.percent() != null}
+                                     ? ${view.totalScore()} + ' / ' + ${view.totalMax()} + '  (' + ${#numbers.formatDecimal(view.percent(), 1, 1)} + '%)'
+                                     : '해당 없음'">45 / 50 (90.0%)</td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <p class="small text-gray-500 mt-2 mb-0"
+               th:text="${view.gradedOnly}
+                        ? '채점이 끝난 과제만으로 계산합니다.'
+                        : '시작된 과제 전부로 계산합니다. 미제출·채점 전 과제는 0점으로 들어갑니다. (예정 과제 제외)'">설명</p>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
