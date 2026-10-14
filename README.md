@@ -29,7 +29,24 @@ REST API 대신 **서버 렌더링(Controller → Model → Thymeleaf)** 으로 
 - DB 는 H2 **파일** 모드라서 서버를 재시작해도 데이터가 남습니다. (`data/lmsdb.mv.db`, Git 제외)
   처음부터 다시 하려면 서버를 끄고 `data/` 폴더를 지운 뒤 실행하세요. (강사 계정은 자동 생성)
 - 업로드 파일은 프로젝트 폴더의 `uploads/` 에 저장됩니다. (Git 제외)
-- DB 확인: http://localhost:8080/h2-console (JDBC URL `jdbc:h2:file:./data/lmsdb`, User `sa`)
+- DB 확인 (H2 콘솔): 보안상 **기본은 꺼져 있습니다.** 내 PC 에서만 실행 옵션에 `--spring.h2.console.enabled=true` 를 붙이고
+  http://localhost:8080/h2-console (JDBC URL `jdbc:h2:file:./data/lmsdb`, User `sa`)
+
+### 제출용 jar 만들기 · 배포
+
+```bash
+./gradlew bootJar
+```
+→ `build/libs/lms.jar` 하나가 제출 파일입니다. (코드·화면·라이브러리·내장 톰캣 포함, 약 70MB)
+
+```bash
+java -jar lms.jar
+```
+- **Java 17 이상** 필요
+- 포트: `--server.port=8081` 옵션, `SERVER_PORT` 또는 `PORT` 환경변수 중 하나로 지정 (없으면 8080)
+- 서브도메인(리버스 프록시) 뒤에서도 로그인·리다이렉트가 원래 주소로 동작 (`server.forward-headers-strategy: framework`)
+- jar 를 실행한 폴더에 `data/`(DB), `uploads/`(첨부파일) 가 만들어집니다
+- ⚠️ 테스트 강사 비밀번호가 공개되어 있으므로, **배포 직후 강사로 로그인해 "내 정보 → 비밀번호 변경"** 을 해 두세요 (파일 DB 라 재시작해도 유지)
 
 ### 테스트 계정
 

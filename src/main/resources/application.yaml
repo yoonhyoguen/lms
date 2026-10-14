@@ -9,9 +9,11 @@ spring:
     username: sa
     password:
 
+  # H2 콘솔: 배포(인터넷 공개) 시 누구나 DB 를 볼 수 있으므로 기본은 꺼 둔다.
+  #   내 PC 에서 DB 를 보고 싶을 때만: 실행 옵션에 --spring.h2.console.enabled=true
   h2:
     console:
-      enabled: true # localhost:8080/h2-console
+      enabled: false
 
   jpa:
     hibernate:
@@ -29,6 +31,10 @@ spring:
       max-request-size: 11MB  # 요청 전체 최대 (파일 + 폼 값)
 
 server:
+  # 포트: 실행 옵션(--server.port) > SERVER_PORT 환경변수 > PORT 환경변수 > 기본 8080
+  port: ${PORT:8080}
+  # 배포 시스템의 서브도메인(프록시) 뒤에서 실행될 때, 원래 주소(X-Forwarded-*)로 리다이렉트하도록
+  forward-headers-strategy: framework
   tomcat:
     max-swallow-size: -1 # 큰 파일도 끝까지 받은 뒤 "10MB 초과" 알림을 보여주기 위함 (기본값이면 연결이 끊김)
 

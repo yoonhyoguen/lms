@@ -46,3 +46,13 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// 제출용 실행 jar: build/libs/lms.jar  (./gradlew bootJar)
+tasks.named('bootJar') {
+	archiveFileName = 'lms.jar'
+}
+
+// 실행 불가능한 plain jar 는 만들지 않음 (제출 시 헷갈리지 않게)
+tasks.named('jar') {
+	enabled = false
+}
