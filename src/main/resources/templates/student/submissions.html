@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>내 제출</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <h1 class="h3 mb-4 text-gray-800">내 제출 · 결과</h1>
+
+    <div th:if="${#lists.isEmpty(submissions)}" class="card shadow mb-4">
+        <div class="card-body text-center text-gray-500 py-5">
+            아직 제출한 과제가 없습니다.
+            <a th:href="@{/student/assignments}">내 과제</a>에서 제출할 수 있습니다.
+        </div>
+    </div>
+
+    <div class="card shadow mb-4" th:unless="${#lists.isEmpty(submissions)}">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0">
+                    <thead class="thead-light">
+                    <tr>
+                        <th>강좌</th>
+                        <th>과제</th>
+                        <th>제출일시</th>
+                        <th style="width: 100px;">상태</th>
+                        <th style="width: 100px;">점수</th>
+                        <th>피드백</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="submission : ${submissions}" th:with="assignment=${submission.assignment}">
+                        <td class="small text-gray-600" th:text="${assignment.course.title}">강좌</td>
+                        <td>
+                            <a th:href="@{/student/assignments/{id}(id=${assignment.id})}"
+                               th:text="${assignment.title}">과제</a>
+                        </td>
+                        <td class="small" th:text="${#temporals.format(submission.submittedAt, 'yyyy-MM-dd HH:mm')}">일시</td>
+                        <td>
+                            <span class="badge" th:classappend="${submission.status.badgeClass}"
+                                  th:text="${submission.status.label}">제출됨</span>
+                        </td>
+                        <td>
+                            <span th:if="${submission.graded}" class="font-weight-bold"
+                                  th:text="${submission.score} + ' / ' + ${assignment.maxScore}">40 / 50</span>
+                            <span th:unless="${submission.graded}" class="small text-gray-500">채점 전</span>
+                        </td>
+                        <!-- 피드백은 길 수 있어서 50자까지만, 전체는 과제 상세에서 -->
+                        <td class="small"
+                            th:text="${submission.feedback != null and !#strings.isEmpty(submission.feedback)} ? ${#strings.abbreviate(submission.feedback, 50)} : '-'">
+                            피드백
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

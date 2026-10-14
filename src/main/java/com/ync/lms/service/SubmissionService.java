@@ -169,6 +169,13 @@ public class SubmissionService {
     }
 
     /**
+     * S4 학생: 내 제출 목록 (최근 제출순). 본인 것만 조회하므로 별도 권한 검사 불필요
+     */
+    public List<Submission> findMySubmissions(Long studentId) {
+        return submissionRepository.findByStudentIdOrderBySubmittedAtDesc(studentId);
+    }
+
+    /**
      * 이 과제에 대한 내 제출물 (없으면 empty)
      */
     public Optional<Submission> findMySubmission(Long assignmentId, Long studentId) {
