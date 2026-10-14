@@ -58,6 +58,15 @@ public class Course {
         this.joinCode = joinCode;
     }
 
+    // 추가 기능: 강좌 카드 색 (DB 에 저장하지 않고 강좌 번호로 정함 → 어느 화면에서나 같은 색)
+    private static final String[] CARD_COLORS = {
+            "#4e73df", "#1cc88a", "#36b9cc", "#f6c23e", "#e74a3b", "#6f42c1", "#fd7e14", "#20c997"
+    };
+
+    public String getColor() {
+        return id == null ? CARD_COLORS[0] : CARD_COLORS[(int) (id % CARD_COLORS.length)];
+    }
+
     // B5: 이 강좌를 개설한 강사인가?
     public boolean isOwnedBy(Long userId) {
         return instructor.getId().equals(userId);
