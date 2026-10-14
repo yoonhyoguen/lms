@@ -20,3 +20,13 @@ spring:
       hibernate:
         format_sql: true    # SQL 을 줄바꿈해서 보기 좋게
     open-in-view: true      # 기본값을 명시 (경고 메시지 제거)
+
+  # 파일 업로드 크기 제한
+  servlet:
+    multipart:
+      max-file-size: 10MB     # 파일 1개 최대
+      max-request-size: 11MB  # 요청 전체 최대 (파일 + 폼 값)
+
+# 우리 앱 설정: 업로드 파일 저장 폴더 (프로젝트 폴더 기준)
+app:
+  upload-dir: ./uploads

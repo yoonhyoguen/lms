@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### 업로드 파일 (실제 사용자 파일은 Git에 올리지 않음) ###
+uploads/
