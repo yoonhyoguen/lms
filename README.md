@@ -8,7 +8,7 @@ REST API 대신 **서버 렌더링(Controller → Model → Thymeleaf)** 으로 
 | 구분 | 사용 기술 |
 |---|---|
 | 백엔드 | Spring Boot 3.5 · Java 17 · Spring Data JPA |
-| DB | H2 (메모리, 개발용) |
+| DB | H2 (파일 모드, 재시작해도 유지) |
 | 인증 | Spring Security 6 · 세션 기반 폼 로그인 · BCrypt |
 | 화면 | Thymeleaf · Layout Dialect · thymeleaf-extras-springsecurity6 |
 | UI 템플릿 | SB Admin 2 (Bootstrap 4.6 · jQuery · Font Awesome 5) |
@@ -26,9 +26,10 @@ REST API 대신 **서버 렌더링(Controller → Model → Thymeleaf)** 으로 
 ```
 또는 IntelliJ 에서 `LmsApplication` 실행 → 브라우저에서 **http://localhost:8080**
 
-- DB 는 H2 **메모리** 모드라서 서버를 재시작하면 데이터가 초기화됩니다. (강사 계정은 자동 생성)
+- DB 는 H2 **파일** 모드라서 서버를 재시작해도 데이터가 남습니다. (`data/lmsdb.mv.db`, Git 제외)
+  처음부터 다시 하려면 서버를 끄고 `data/` 폴더를 지운 뒤 실행하세요. (강사 계정은 자동 생성)
 - 업로드 파일은 프로젝트 폴더의 `uploads/` 에 저장됩니다. (Git 제외)
-- DB 확인: http://localhost:8080/h2-console (JDBC URL `jdbc:h2:mem:lmsdb`, User `sa`)
+- DB 확인: http://localhost:8080/h2-console (JDBC URL `jdbc:h2:file:./data/lmsdb`, User `sa`)
 
 ### 테스트 계정
 
@@ -166,6 +167,6 @@ AI 가 만든 코드에서 발견해 고친 문제와 검증 과정은 [`docs/pr
 
 ## 알려진 제한
 
-- H2 메모리 DB: 재시작하면 데이터가 사라짐 (MySQL 전환은 선택 사항)
+- H2 파일 DB 사용 (MySQL 전환은 선택 사항, 미적용)
 - 첨부파일은 과제·제출물마다 1개
 - 강좌 수정/삭제, 수강 취소, 비밀번호 변경 기능 없음
