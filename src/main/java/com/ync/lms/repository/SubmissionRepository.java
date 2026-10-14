@@ -1,7 +1,10 @@
 package com.ync.lms.repository;
 
 import com.ync.lms.domain.Submission;
+import com.ync.lms.dto.AssignmentSubmissionStat;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,4 +22,18 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
     // S4 학생: 내 제출 목록 (최근 제출순)
     List<Submission> findByStudentIdOrderBySubmittedAtDesc(Long studentId);
+
+    // I6 통계: 강좌의 모든 제출물 (과제별 미제출자 계산용)
+    List<Submission> findByAssignmentCourseId(Long courseId);
+
+    // I6 통계: 강좌의 과제별 제출 수, 채점 수, 평균 점수 (group by)
+    //   count(s.score) / avg(s.score) 는 null(채점 전)을 빼고 계산한다
+    @Query("""
+            select new com.ync.lms.dto.AssignmentSubmissionStat(
+                       s.assignment.id, count(s), count(s.score), avg(s.score))
+            from Submission s
+            where s.assignment.course.id = :courseId
+            group by s.assignment.id
+            """)
+    List<AssignmentSubmissionStat> countByAssignmentInCourse(@Param("courseId") Long courseId);
 }
