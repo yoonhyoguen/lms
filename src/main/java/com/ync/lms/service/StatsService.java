@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -116,10 +117,17 @@ public class StatsService {
 
     // ===================== 강사 대시보드 (/) =====================
 
-    /** 강사 홈 요약 카드 */
+    /** 강사 홈 요약 카드 + 과제별 제출률 차트 */
     public record InstructorHomeView(long courseCount, long openAssignmentCount, long ungradedCount,
-                                     Integer averageSubmissionRate) { // 시작된 과제가 없으면 null
+                                     Integer averageSubmissionRate, // 시작된 과제가 없으면 null
+                                     List<RateBar> rateBars) {
     }
+
+    /** 차트 막대 하나: 과제 이름과 제출률 */
+    public record RateBar(String label, int rate) {
+    }
+
+    private static final int HOME_CHART_MAX = 8; // 홈 차트에는 마감이 늦은 과제부터 최대 8개
 
     public InstructorHomeView getInstructorHome(Long instructorId) {
         LocalDateTime now = LocalDateTime.now();
@@ -128,12 +136,27 @@ public class StatsService {
         // 평균 제출률 = 내 모든 강좌의 (시작된 과제 제출 수 합) ÷ (수강생 수 × 시작된 과제 수 합)
         long expected = 0;
         long submitted = 0;
+        List<AssignmentStatRow> startedRows = new ArrayList<>();
         for (Course course : courses) {
             CourseStatsView stats = getCourseStats(course.getId(), instructorId);
             expected += stats.expectedSubmissions();
             submitted += stats.startedSubmittedCount();
+            stats.rows().stream().filter(AssignmentStatRow::isStarted).forEach(startedRows::add);
         }
         Integer averageRate = expected == 0 ? null : (int) Math.round(submitted * 100.0 / expected);
+
+        // 과제별 제출률 차트: 시작된 과제를 마감순으로, 최근 것 최대 8개 (강좌가 여러 개면 강좌명도 표시)
+        boolean showCourse = courses.size() > 1;
+        List<RateBar> rateBars = startedRows.stream()
+                .sorted(Comparator.comparing((AssignmentStatRow r) -> r.assignment().getEndAt()))
+                .map(r -> new RateBar(
+                        showCourse ? r.assignment().getTitle() + " (" + r.assignment().getCourse().getTitle() + ")"
+                                   : r.assignment().getTitle(),
+                        r.submissionRate()))
+                .toList();
+        if (rateBars.size() > HOME_CHART_MAX) {
+            rateBars = rateBars.subList(rateBars.size() - HOME_CHART_MAX, rateBars.size());
+        }
 
         return new InstructorHomeView(
                 courses.size(),
@@ -141,7 +164,8 @@ public class StatsService {
                         instructorId, now, now),
                 submissionRepository.countByAssignmentCourseInstructorIdAndStatus(
                         instructorId, SubmissionStatus.SUBMITTED), // 채점 대기
-                averageRate
+                averageRate,
+                rateBars
         );
     }
 

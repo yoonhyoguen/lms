@@ -17,11 +17,16 @@ public class HomeController {
     private final StatsService statsService;
     private final SubmissionService submissionService;
 
-    // 역할별 대시보드: 강사 = 요약 카드, 학생 = S5 내 통계
+    // 역할별 대시보드: 강사 = 요약 카드 + 과제별 제출률 차트, 학생 = S5 내 통계
     @GetMapping("/")
     public String home(@AuthenticationPrincipal LoginUser loginUser, Model model) {
         if (loginUser.getRole() == Role.INSTRUCTOR) {
-            model.addAttribute("instructorHome", statsService.getInstructorHome(loginUser.getId()));
+            StatsService.InstructorHomeView instructorHome = statsService.getInstructorHome(loginUser.getId());
+            model.addAttribute("instructorHome", instructorHome);
+
+            // 차트용 (과제별 제출률 %)
+            model.addAttribute("rateLabels", instructorHome.rateBars().stream().map(StatsService.RateBar::label).toList());
+            model.addAttribute("rateValues", instructorHome.rateBars().stream().map(StatsService.RateBar::rate).toList());
         } else {
             StatsService.StudentHomeView studentHome = statsService.getStudentHome(loginUser.getId());
             model.addAttribute("studentHome", studentHome);

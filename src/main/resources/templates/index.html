@@ -57,6 +57,15 @@
             </div>
         </div>
 
+        <!-- 과제별 제출률 차트 (시작된 과제, 내 모든 강좌) -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">과제별 제출률 (%)</h6></div>
+            <div class="card-body">
+                <div th:unless="${h.rateBars.isEmpty()}" style="height: 280px;"><canvas id="homeRateChart"></canvas></div>
+                <p th:if="${h.rateBars.isEmpty()}" class="text-center text-gray-500 my-3">아직 시작된 과제가 없습니다.</p>
+            </div>
+        </div>
+
         <a th:href="@{/instructor/stats}" class="btn btn-primary btn-sm">
             <i class="fas fa-chart-bar fa-sm"></i> 강좌별 통계 대시보드 보기
         </a>
@@ -181,9 +190,27 @@
 
 </div>
 
-<!-- 학생 점수 차트 (Chart.js 2.9) -->
+<!-- 대시보드 차트 (Chart.js 2.9) -->
 <th:block layout:fragment="script">
-    <script th:if="${studentHome}" th:src="@{/vendor/chart.js/Chart.min.js}"></script>
+    <script th:src="@{/vendor/chart.js/Chart.min.js}"></script>
+    <!-- 강사: 과제별 제출률 차트 -->
+    <script th:if="${instructorHome}" th:inline="javascript">
+        const rateLabels = /*[[${rateLabels}]]*/ [];
+        const rateValues = /*[[${rateValues}]]*/ [];
+        const rateCanvas = document.getElementById('homeRateChart');
+        if (rateCanvas && rateLabels.length > 0) {
+            new Chart(rateCanvas, {
+                type: 'bar',
+                data: {labels: rateLabels, datasets: [{data: rateValues, backgroundColor: '#4e73df', maxBarThickness: 40}]},
+                options: {
+                    maintainAspectRatio: false,
+                    legend: {display: false},
+                    scales: {yAxes: [{ticks: {beginAtZero: true, max: 100, callback: v => v + '%'}}]},
+                    tooltips: {callbacks: {label: item => item.yLabel + '%'}}
+                }
+            });
+        }
+    </script>
     <script th:if="${studentHome}" th:inline="javascript">
         const labels = /*[[${chartLabels}]]*/ [];
         const scores = /*[[${chartScores}]]*/ [];
