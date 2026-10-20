@@ -73,7 +73,7 @@ class SubmissionRepositoryTest {
     }
 
     @Test
-    void 과제별_제출수_채점수_평균점수를_group_by로_계산한다() {
+    void 과제별_제출수_채점수_평균_최고_최저점수를_group_by로_계산한다() {
         Map<Long, AssignmentSubmissionStat> stats = submissionRepository.countByAssignmentInCourse(course.getId())
                 .stream()
                 .collect(Collectors.toMap(AssignmentSubmissionStat::assignmentId, Function.identity()));
@@ -84,11 +84,19 @@ class SubmissionRepositoryTest {
         assertThat(stat1.submittedCount()).isEqualTo(3);
         assertThat(stat1.gradedCount()).isEqualTo(2);       // 채점 전(null) 은 count(score) 에서 빠짐
         assertThat(stat1.averageScore()).isEqualTo(45.0);   // (40 + 50) / 2, null 제외
+        assertThat(stat1.highestScore()).isEqualTo(50);
+        assertThat(stat1.lowestScore()).isEqualTo(40);      // 채점 전(null) 은 최저에서도 빠짐
+        assertThat(stat1.highestScore()).isEqualTo(50);
+        assertThat(stat1.lowestScore()).isEqualTo(40);      // 채점 전(null) 은 최저에서도 빠짐
 
         AssignmentSubmissionStat stat2 = stats.get(hw2.getId());
         assertThat(stat2.submittedCount()).isEqualTo(1);
         assertThat(stat2.gradedCount()).isZero();
         assertThat(stat2.averageScore()).isNull();          // 채점 0건 → 평균 없음
+        assertThat(stat2.highestScore()).isNull();
+        assertThat(stat2.lowestScore()).isNull();
+        assertThat(stat2.highestScore()).isNull();
+        assertThat(stat2.lowestScore()).isNull();
     }
 
     @Test

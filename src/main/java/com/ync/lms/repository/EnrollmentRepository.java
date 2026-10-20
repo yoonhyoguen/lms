@@ -18,7 +18,4 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     // 강좌 삭제 규칙: 수강생이 있나?
     boolean existsByCourseId(Long courseId);
-
-    // 강사 대시보드: 내 모든 강좌의 수강 등록 수
-    long countByCourseInstructorId(Long instructorId);
 }

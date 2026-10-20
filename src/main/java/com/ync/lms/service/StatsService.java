@@ -45,6 +45,8 @@ public class StatsService {
                                     long submittedCount,
                                     long gradedCount,
                                     Double averageScore,
+                                    Integer highestScore,  // 최고 점수 (채점 0건이면 null)
+                                    Integer lowestScore,   // 최저 점수 (채점 0건이면 null)
                                     List<User> notSubmittedStudents) {
 
         /** 제출률 (%) */
@@ -72,10 +74,30 @@ public class StatsService {
 
         /** 전체 제출률 (%) = 시작된 과제들의 제출 수 합 ÷ (수강생 수 × 시작된 과제 수) */
         public int overallSubmissionRate() {
-            List<AssignmentStatRow> started = rows.stream().filter(AssignmentStatRow::isStarted).toList();
-            long expected = studentCount * started.size();
-            long submitted = started.stream().mapToLong(AssignmentStatRow::submittedCount).sum();
-            return expected == 0 ? 0 : (int) Math.round(submitted * 100.0 / expected);
+            long expected = expectedSubmissions();
+            return expected == 0 ? 0 : (int) Math.round(startedSubmittedCount() * 100.0 / expected);
+        }
+
+        /** 제출되어야 할 건수 = 수강생 수 × 시작된 과제 수 (제출률의 분모) */
+        public long expectedSubmissions() {
+            return studentCount * rows.stream().filter(AssignmentStatRow::isStarted).count();
+        }
+
+        /** 시작된 과제들의 실제 제출 건수 (제출률의 분자) */
+        public long startedSubmittedCount() {
+            return rows.stream().filter(AssignmentStatRow::isStarted).mapToLong(AssignmentStatRow::submittedCount).sum();
+        }
+
+        /** 미제출자 표 한 줄: (과제, 학생) */
+        public record NotSubmittedRow(Assignment assignment, User student) {
+        }
+
+        /** 미제출자 전체를 (과제, 학생) 한 줄씩 펼친 목록 → DataTables 표용 */
+        public List<NotSubmittedRow> notSubmittedRows() {
+            return rows.stream()
+                    .filter(AssignmentStatRow::isStarted)
+                    .flatMap(r -> r.notSubmittedStudents().stream().map(s -> new NotSubmittedRow(r.assignment(), s)))
+                    .toList();
         }
 
         /** 전체 평균 점수 (100점 환산, 채점 건수로 가중평균). 채점 0건이면 null */
@@ -90,30 +112,36 @@ public class StatsService {
                     .sum();
             return weightedSum / graded;
         }
-
-        /** 미제출이 하나라도 있는 (시작된) 과제 */
-        public List<AssignmentStatRow> rowsWithNotSubmitted() {
-            return rows.stream()
-                    .filter(r -> r.isStarted() && !r.notSubmittedStudents().isEmpty())
-                    .toList();
-        }
     }
 
     // ===================== 강사 대시보드 (/) =====================
 
-    /** 강사 홈 요약 카드 */
-    public record InstructorHomeView(long courseCount, long studentCount, long openAssignmentCount, long ungradedCount) {
+    /** 강사 홈 요약 카드 4개 (교안 필수: 강좌 · 진행중 과제 · 채점 대기 · 평균 제출률) */
+    public record InstructorHomeView(long courseCount, long openAssignmentCount, long ungradedCount,
+                                     Integer averageSubmissionRate) { // 시작된 과제가 없으면 null
     }
 
     public InstructorHomeView getInstructorHome(Long instructorId) {
         LocalDateTime now = LocalDateTime.now();
+        List<Course> courses = courseService.findMyCourses(instructorId);
+
+        // 평균 제출률 = 내 모든 강좌의 (시작된 과제 제출 수 합) ÷ (수강생 수 × 시작된 과제 수 합)
+        long expected = 0;
+        long submitted = 0;
+        for (Course course : courses) {
+            CourseStatsView stats = getCourseStats(course.getId(), instructorId);
+            expected += stats.expectedSubmissions();
+            submitted += stats.startedSubmittedCount();
+        }
+        Integer averageRate = expected == 0 ? null : (int) Math.round(submitted * 100.0 / expected);
+
         return new InstructorHomeView(
-                courseService.findMyCourses(instructorId).size(),
-                enrollmentRepository.countByCourseInstructorId(instructorId),
+                courses.size(),
                 assignmentRepository.countByCourseInstructorIdAndStartAtLessThanEqualAndEndAtGreaterThanEqual(
                         instructorId, now, now),
                 submissionRepository.countByAssignmentCourseInstructorIdAndStatus(
-                        instructorId, SubmissionStatus.SUBMITTED) // 채점 대기
+                        instructorId, SubmissionStatus.SUBMITTED), // 채점 대기
+                averageRate
         );
     }
 
@@ -259,6 +287,8 @@ public class StatsService {
                             stat == null ? 0 : stat.submittedCount(),
                             stat == null ? 0 : stat.gradedCount(),
                             stat == null ? null : stat.averageScore(),
+                            stat == null ? null : stat.highestScore(),
+                            stat == null ? null : stat.lowestScore(),
                             notSubmitted);
                 })
                 .toList();

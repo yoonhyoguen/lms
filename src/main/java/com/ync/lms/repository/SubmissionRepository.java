@@ -34,11 +34,11 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     // I6 통계: 강좌의 모든 제출물 (과제별 미제출자 계산용)
     List<Submission> findByAssignmentCourseId(Long courseId);
 
-    // I6 통계: 강좌의 과제별 제출 수, 채점 수, 평균 점수 (group by)
-    //   count(s.score) / avg(s.score) 는 null(채점 전)을 빼고 계산한다
+    // I6 통계: 강좌의 과제별 제출 수, 채점 수, 평균·최고·최저 점수 (group by)
+    //   count(s.score) / avg / max / min 은 null(채점 전)을 빼고 계산한다
     @Query("""
             select new com.ync.lms.dto.AssignmentSubmissionStat(
-                       s.assignment.id, count(s), count(s.score), avg(s.score))
+                       s.assignment.id, count(s), count(s.score), avg(s.score), max(s.score), min(s.score))
             from Submission s
             where s.assignment.course.id = :courseId
             group by s.assignment.id

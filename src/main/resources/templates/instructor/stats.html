@@ -5,6 +5,7 @@
       layout:decorate="~{layout/layout}">
 <head>
     <title>통계</title>
+    <link th:href="@{/vendor/datatables/dataTables.bootstrap4.min.css}" rel="stylesheet">
 </head>
 <body>
 
@@ -96,26 +97,77 @@
             <div class="card-body text-center text-gray-500 py-4">이 강좌에는 아직 과제가 없습니다.</div>
         </div>
 
-        <!-- 과제별 미제출자 -->
+        <!-- 과제별 제출·점수 요약 (평균 · 최고 · 최저) -->
+        <div class="card shadow mb-4" th:unless="${view.rows.isEmpty()}">
+            <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">과제별 제출 · 점수 (평균 · 최고 · 최저)</h6></div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm mb-0" id="scoreTable">
+                        <thead class="thead-light">
+                        <tr>
+                            <th>과제</th>
+                            <th>상태</th>
+                            <th class="text-center">제출</th>
+                            <th class="text-center">제출률</th>
+                            <th class="text-center">채점</th>
+                            <th class="text-center">평균</th>
+                            <th class="text-center">최고</th>
+                            <th class="text-center">최저</th>
+                            <th class="text-center">만점</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="row : ${view.rows}">
+                            <td><a th:href="@{/instructor/assignments/{id}/submissions(id=${row.assignment.id})}"
+                                   th:text="${row.assignment.title}">과제</a></td>
+                            <td><span class="badge" th:classappend="${row.assignment.status.badgeClass}"
+                                      th:text="${row.assignment.status.label}">진행중</span></td>
+                            <td class="text-center" th:text="${row.submittedCount} + ' / ' + ${row.studentCount}">0 / 0</td>
+                            <td class="text-center" th:text="${row.isStarted()} ? ${row.submissionRate()} + '%' : '-'">0%</td>
+                            <td class="text-center" th:text="${row.gradedCount} + '건'">0건</td>
+                            <td class="text-center"
+                                th:text="${row.averageScore != null} ? ${#numbers.formatDecimal(row.averageScore, 1, 1)} : '-'">-</td>
+                            <td class="text-center" th:text="${row.highestScore != null} ? ${row.highestScore} : '-'">-</td>
+                            <td class="text-center" th:text="${row.lowestScore != null} ? ${row.lowestScore} : '-'">-</td>
+                            <td class="text-center" th:text="${row.assignment.maxScore}">100</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small text-gray-500 mt-2 mb-0">* 평균 · 최고 · 최저는 채점이 끝난 제출물만으로 계산합니다 (원점수).</p>
+            </div>
+        </div>
+
+        <!-- 과제별 미제출자 (DataTables: 검색, 정렬) -->
         <div class="card shadow mb-4" th:unless="${view.rows.isEmpty()}">
             <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-danger">과제별 미제출자</h6></div>
             <div class="card-body">
-                <p th:if="${view.rowsWithNotSubmitted().isEmpty()}" class="text-center text-gray-500 my-2">
+                <p th:if="${view.notSubmittedRows().isEmpty()}" class="text-center text-gray-500 my-2">
                     미제출자가 없습니다. 👍
                 </p>
-                <div th:each="row : ${view.rowsWithNotSubmitted()}" class="mb-3">
-                    <div class="mb-1">
-                        <a class="font-weight-bold"
-                           th:href="@{/instructor/assignments/{id}/submissions(id=${row.assignment.id})}"
-                           th:text="${row.assignment.title}">과제</a>
-                        <span class="badge" th:classappend="${row.assignment.status.badgeClass}"
-                              th:text="${row.assignment.status.label}">진행중</span>
-                        <span class="small text-gray-500"
-                              th:text="${row.notSubmittedStudents.size()} + '명 / ' + ${row.studentCount} + '명'">2명 / 10명</span>
-                    </div>
-                    <span th:each="student : ${row.notSubmittedStudents}"
-                          class="badge badge-light border mr-1 mb-1 p-2"
-                          th:text="${student.name} + ' (' + ${student.studentNo} + ')'">홍길동 (2026001)</span>
+                <div class="table-responsive" th:unless="${view.notSubmittedRows().isEmpty()}">
+                    <table class="table table-bordered table-sm" id="notSubmittedTable" width="100%">
+                        <thead>
+                        <tr>
+                            <th>과제</th>
+                            <th>상태</th>
+                            <th>마감</th>
+                            <th>학번</th>
+                            <th>이름</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="ns : ${view.notSubmittedRows()}">
+                            <td><a th:href="@{/instructor/assignments/{id}/submissions(id=${ns.assignment.id})}"
+                                   th:text="${ns.assignment.title}">과제</a></td>
+                            <td><span class="badge" th:classappend="${ns.assignment.status.badgeClass}"
+                                      th:text="${ns.assignment.status.label}">진행중</span></td>
+                            <td th:text="${#temporals.format(ns.assignment.endAt, 'yyyy-MM-dd HH:mm')}">2026-10-20 23:59</td>
+                            <td th:text="${ns.student.studentNo}">2026001</td>
+                            <td th:text="${ns.student.name}">홍길동</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -127,6 +179,26 @@
 <!-- Chart.js 2.9 (SB Admin 2 내장) -->
 <th:block layout:fragment="script">
     <script th:src="@{/vendor/chart.js/Chart.min.js}"></script>
+    <script th:src="@{/vendor/datatables/jquery.dataTables.min.js}"></script>
+    <script th:src="@{/vendor/datatables/dataTables.bootstrap4.min.js}"></script>
+    <!-- th:inline="none": 안의 JS 2차원 배열 대괄호를 Thymeleaf 인라인 식으로 해석하지 않게 -->
+    <script th:inline="none">
+        if (document.getElementById('notSubmittedTable')) {
+            $('#notSubmittedTable').DataTable({
+                order: [[2, 'asc'], [3, 'asc']], // 마감 빠른 순 → 학번순
+                pageLength: 10,
+                language: {
+                    search: '검색:',
+                    lengthMenu: '_MENU_ 줄씩 보기',
+                    info: '전체 _TOTAL_건 중 _START_ ~ _END_',
+                    infoEmpty: '0건',
+                    infoFiltered: '(전체 _MAX_건에서 검색)',
+                    zeroRecords: '검색 결과가 없습니다.',
+                    paginate: {previous: '이전', next: '다음'}
+                }
+            });
+        }
+    </script>
     <!-- th:inline="javascript": 서버 값을 JS 로 안전하게 넘김 (주석 안 값은 Thymeleaf 가 치환) -->
     <script th:inline="javascript">
         const labels = /*[[${chartLabels}]]*/ [];

@@ -27,14 +27,6 @@
                 </div></div>
             </div>
             <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-info shadow h-100 py-2"><div class="card-body">
-                    <div class="row no-gutters align-items-center"><div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">전체 수강생</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${h.studentCount} + '명'">0명</div>
-                    </div><div class="col-auto"><i class="fas fa-users fa-2x text-gray-300"></i></div></div>
-                </div></div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
                 <div class="card border-left-success shadow h-100 py-2"><div class="card-body">
                     <div class="row no-gutters align-items-center"><div class="col mr-2">
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">진행중 과제</div>
@@ -48,6 +40,19 @@
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">채점 대기</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${h.ungradedCount} + '건'">0건</div>
                     </div><div class="col-auto"><i class="fas fa-pen fa-2x text-gray-300"></i></div></div>
+                </div></div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2"><div class="card-body">
+                    <div class="row no-gutters align-items-center"><div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">평균 제출률</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"
+                             th:text="${h.averageSubmissionRate != null} ? ${h.averageSubmissionRate} + '%' : '-'">0%</div>
+                        <div class="progress progress-sm mt-2" th:if="${h.averageSubmissionRate != null}">
+                            <div class="progress-bar bg-info" role="progressbar"
+                                 th:style="'width: ' + ${h.averageSubmissionRate} + '%'"></div>
+                        </div>
+                    </div><div class="col-auto"><i class="fas fa-clipboard-check fa-2x text-gray-300"></i></div></div>
                 </div></div>
             </div>
         </div>
