@@ -116,7 +116,7 @@ public class StatsService {
 
     // ===================== 강사 대시보드 (/) =====================
 
-    /** 강사 홈 요약 카드 4개 (교안 필수: 강좌 · 진행중 과제 · 채점 대기 · 평균 제출률) */
+    /** 강사 홈 요약 카드 */
     public record InstructorHomeView(long courseCount, long openAssignmentCount, long ungradedCount,
                                      Integer averageSubmissionRate) { // 시작된 과제가 없으면 null
     }

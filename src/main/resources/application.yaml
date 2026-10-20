@@ -23,6 +23,13 @@ spring:
       hibernate:
         format_sql: true    # SQL 을 줄바꿈해서 보기 좋게
     open-in-view: true      # 기본값을 명시 (경고 메시지 제거)
+    defer-datasource-initialization: true # 테이블을 만든 "다음에" data.sql 을 실행
+
+  # 테스트 데이터 src/main/resources/data.sql 을 켤 때마다 실행 (이미 있는 데이터는 건너뜀)
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
 
   # 파일 업로드 크기 제한
   servlet:
