@@ -1,5 +1,7 @@
 # ERD 설계
 
+![ERD](erd.png)
+
 ## 1. 다이어그램
 
 ```mermaid
@@ -42,6 +44,7 @@ erDiagram
         datetime start_at
         datetime end_at
         int max_score "배점"
+        boolean scores_published "점수 공개 여부 (기본 true)"
         varchar file_original_name "첨부 (선택)"
         varchar file_stored_name
         datetime created_at
@@ -92,3 +95,14 @@ erDiagram
 | B6 0 ≤ 점수 ≤ 배점 | `SUBMISSION.score`, `ASSIGNMENT.max_score` |
 | B7 종료 > 시작 | `ASSIGNMENT.end_at > start_at` |
 | B8 제출물 있으면 과제 삭제 불가 | `SUBMISSION` 에 해당 assignment 존재 여부 |
+
+## 5. 강의 예시 ERD 와 이름이 다른 칸
+
+예시 ERD 와 뜻은 같고 이름만 다르게 지은 칸입니다. (W1 에 만든 이름을 그대로 유지)
+
+| 테이블 | 예시 ERD | 이 프로젝트 | 비고 |
+|---|---|---|---|
+| COURSE | `name` | `title` | 과제(`ASSIGNMENT.title`)와 같은 이름으로 통일 |
+| ENROLLMENT | `joined_at` | `enrolled_at` | 엔티티 이름(Enrollment)에 맞춤 |
+| ASSIGNMENT · SUBMISSION | `file_path` | `file_stored_name` + `file_original_name` | 저장 이름(UUID)과 원래 이름을 나눠 저장 → 다운로드 시 원래 이름으로 |
+| ASSIGNMENT | (없음) | `scores_published` | 추가 기능 "점수 숨기기" |
