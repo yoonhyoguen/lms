@@ -85,7 +85,7 @@ java -jar lms.jar
 | I3 | 과제 등록·수정·삭제 | ✅ 완료 | 시작/종료일시 · 배점 · 첨부파일 1개 (UUID 저장, 10MB 제한) |
 | I4 | 제출 현황 | ✅ 완료 | 과제별 제출/미제출 표 + 요약 카드, DataTables 검색·정렬 |
 | I5 | 채점·피드백 | ✅ 완료 | 점수 + 코멘트, 재채점 가능 |
-| I6 | 통계 대시보드 | ✅ 완료 | 강좌 선택, 수강생·과제·제출률·평균 카드, Chart.js 차트 2개, 과제별 평균·최고·최저 표, 미제출자 DataTables. 강사 홈: 강좌·진행중 과제·채점 대기·평균 제출률 카드 |
+| I6 | 통계 대시보드 | ✅ 완료 | 강좌 선택, 수강생·과제·제출률·평균 카드, Chart.js 차트 2개, 과제별 평균·최고·최저 표, 미제출자 DataTables. 강사 홈: 강좌·진행중 과제·채점 대기·평균 제출률 카드 + 과제별 제출률 차트 |
 
 ### 학생
 | ID | 기능 | 상태 | 구현 |
@@ -211,7 +211,16 @@ java -jar lms.jar
 ## 설계
 
 - **ERD:** [`docs/erd.png`](docs/erd.png) · [`docs/erd.md`](docs/erd.md) — USERS · COURSE · ENROLLMENT · ASSIGNMENT · SUBMISSION
-  (예시 ERD 와 이름이 다른 칸: `COURSE.title`, `ENROLLMENT.enrolled_at`, `file_stored_name` — 이유는 erd.md 5번)
+
+#### 예시 ERD 와 다른 칸 (관계 · 필수 칸은 그대로, 이름 변경 · 추가한 칸과 이유)
+
+| 테이블 | 예시 ERD | 이 프로젝트 | 이유 |
+|---|---|---|---|
+| COURSE | `name` | `title` | 과제(`ASSIGNMENT.title`)와 같은 이름으로 통일 (W1 설계 때 정함) |
+| ENROLLMENT | `joined_at` | `enrolled_at` | 엔티티 이름(Enrollment)에 맞춤 |
+| ASSIGNMENT · SUBMISSION | `file_path` | `file_stored_name` + **추가** `file_original_name` | 서버에는 UUID 이름으로 저장(같은 이름 덮어쓰기 · 경로 조작 방지), 다운로드할 때는 원래 이름으로 주려고 둘 다 저장 |
+| ASSIGNMENT | — | **추가** `scores_published` | 추가 기능 "점수 숨기기" (기본 true = 채점하면 바로 공개) |
+
 - **프로젝트 맥락 (AI 요청용):** [`docs/context.md`](docs/context.md) — 버전, 패키지 구조, 규칙, 화면 맵
 - **저장하지 않고 계산하는 값:** 과제 배지, 미제출자, 제출률, 평균 점수
 - 파일은 디스크에, DB 에는 원래 이름 + 저장 이름(UUID) 만 저장
@@ -250,14 +259,14 @@ src/main/resources
 | `CsvWriterTest` (7) | 쉼표·따옴표·줄바꿈 처리, `=` `+` `-` `@` 수식 실행 방지, BOM, CRLF |
 | `LmsApplicationTests` (1) | 애플리케이션 시작 |
 
-이 외에 요구사항 ID 와 B1~B8 을 처음부터 끝까지 확인하는 **통합 점검 59개 항목**을 실제 서버에 요청을 보내는 방식으로 수행했습니다. (강사2의 남의 강좌 접근, 개발자도구로 막힌 버튼을 우회한 강제 제출 등 포함)
+이 외에 요구사항 ID 와 B1~B8 을 처음부터 끝까지 확인하는 **통합 점검 60개 항목**을 실제 서버에 요청을 보내는 방식으로 수행했습니다. (강사2의 남의 강좌 접근, 개발자도구로 막힌 버튼을 우회한 강제 제출 등 포함)
 
 ---
 
 ## AI 활용
 
 - **도구:** Claude (Claude Code) — 요구사항 ID 하나씩 작게 요청하고, 공통 맥락은 [`docs/context.md`](docs/context.md) 로 정리
-- **검증:** 생성된 코드를 읽기 → 실행 → 경계값으로 깨뜨려 보기 → 테스트 → 커밋. 과정은 [`docs/prompt-log.md`](docs/prompt-log.md) 에 18건 기록
+- **검증:** 생성된 코드를 읽기 → 실행 → 경계값으로 깨뜨려 보기 → 테스트 → 커밋. 과정은 [`docs/prompt-log.md`](docs/prompt-log.md) 에 20건 기록 (주차별 3건 이상, 주차마다 AI 오류 수정 사례 포함)
 
 ### AI 가 틀려서 고친 사례 Best 3
 
