@@ -1,6 +1,6 @@
 # LMS 과제 제출·채점 시스템 — 주요 개발 핵심내용
 
-윤효근 · 자바 스프링 중간고사 프로젝트 · GitHub `yoonhyoguen/lms`
+윤효근 · 자바 스프링 중간고사 프로젝트 · GitHub `yoonhyoguen/ync-assign-2205013`
 
 ---
 
